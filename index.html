@@ -1,0 +1,4150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI for you — Chiếc gương phản chiếu nội tâm</title>
+  <!-- Google Fonts: Be Vietnam Pro chuẩn dấu tiếng Việt cho DOM & HTML5 Canvas -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'sans-serif'],
+          },
+          colors: {
+            navy: '#0B1120',
+            charcoal: '#161B26',
+            ivory: '#F8FAFC',
+            amberAccent: '#F59E0B',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      --navy: #0B1120;
+      --charcoal: #161B26;
+      --ivory: #F8FAFC;
+      --amber: #F59E0B;
+      --warm-gold: #FDE68A;
+      --indigo: #6366F1;
+      --teal: #14B8A6;
+      --sky: #38BDF8;
+    }
+
+    body {
+      background-color: #0B1120;
+      color: #F8FAFC;
+      overflow-x: hidden;
+    }
+
+    /* Hiệu ứng chữ tiêu đề phát sáng lấp lánh (Shimmer Text) */
+    @keyframes textShimmer {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .shimmer-headline {
+      background: linear-gradient(110deg, #F59E0B 0%, #FDE68A 28%, #F59E0B 52%, #38BDF8 78%, #F59E0B 100%);
+      background-size: 220% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: textShimmer 7s ease-in-out infinite;
+    }
+
+    /* Quầng sáng cực quang trôi nổi (Aurora Orbs) */
+    @keyframes orbFloatOne {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      33% {
+        transform: translate3d(45px, -35px, 0) scale(1.08);
+      }
+      66% {
+        transform: translate3d(-30px, 25px, 0) scale(0.95);
+      }
+    }
+
+    @keyframes orbFloatTwo {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      50% {
+        transform: translate3d(-50px, -40px, 0) scale(1.12);
+      }
+    }
+
+    .aurora-orb-1 {
+      animation: orbFloatOne 18s ease-in-out infinite;
+    }
+
+    .aurora-orb-2 {
+      animation: orbFloatTwo 22s ease-in-out infinite;
+    }
+
+    /* Hiệu ứng chuyển cảnh mượt kiểu Linear (Fade-in + Slide-up) */
+    @keyframes linearReveal {
+      0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.99);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .animate-linear-in {
+      animation: linearReveal 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Glassmorphism Card + Viền phát sáng theo chuột (Spotlight Border) & Nghiêng 3D */
+    .spotlight-card {
+      position: relative;
+      background: rgba(22, 27, 38, 0.68);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .spotlight-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: radial-gradient(
+        340px circle at var(--mouse-x, -500px) var(--mouse-y, -500px),
+        rgba(245, 158, 11, 0.65),
+        rgba(99, 102, 241, 0.25) 45%,
+        transparent 75%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .spotlight-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(
+        280px circle at var(--mouse-x, -500px) var(--mouse-y, -500px),
+        rgba(245, 158, 11, 0.09),
+        transparent 70%
+      );
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .spotlight-card:hover::before,
+    .spotlight-card:hover::after {
+      opacity: 1;
+    }
+
+    /* Hiệu ứng SVG biểu tượng động trên thẻ giọng văn */
+    @keyframes gentlePulseGlow {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.85;
+      }
+      50% {
+        transform: scale(1.12);
+        opacity: 1;
+      }
+    }
+
+    .tone-icon-animated {
+      animation: gentlePulseGlow 3.6s ease-in-out infinite;
+    }
+
+    /* Mandala hình học thiêng (Sacred Geometry) màn hình nhịp thở */
+    @keyframes spinClockwise {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes spinCounterClockwise {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+
+    @keyframes mandalaBreath {
+      0%, 100% {
+        transform: scale(0.86);
+        opacity: 0.55;
+      }
+      38%, 58% {
+        transform: scale(1.22);
+        opacity: 1;
+      }
+    }
+
+    .mandala-ring-cw {
+      transform-origin: center;
+      animation: spinClockwise 28s linear infinite;
+    }
+
+    .mandala-ring-ccw {
+      transform-origin: center;
+      animation: spinCounterClockwise 20s linear infinite;
+    }
+
+    .mandala-breath-container {
+      animation: mandalaBreath 8.5s ease-in-out infinite;
+    }
+
+    /* Sóng thần kinh AI Adaptive */
+    @keyframes neuralWave {
+      0%, 100% {
+        transform: scaleY(0.35);
+      }
+      50% {
+        transform: scaleY(1);
+      }
+    }
+
+    .neural-bar {
+      animation: neuralWave 1.1s ease-in-out infinite;
+    }
+
+    /* Hiệu ứng đóng dấu sáp vàng (Wax Seal Drop & Stamp) */
+    @keyframes waxSealStamp {
+      0% {
+        opacity: 0;
+        transform: scale(2.4) rotate(-28deg);
+      }
+      65% {
+        opacity: 1;
+        transform: scale(0.92) rotate(4deg);
+      }
+      85% {
+        transform: scale(1.04) rotate(-1deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    .animate-wax-seal {
+      animation: waxSealStamp 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Holographic 3D Card Container */
+    .holo-card-wrapper {
+      perspective: 1200px;
+    }
+
+    .holo-card-inner {
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.18s ease-out, box-shadow 0.3s ease;
+    }
+
+    .holo-glare {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(
+        circle at var(--glare-x, 50%) var(--glare-y, 50%),
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(245, 158, 11, 0.08) 35%,
+        transparent 70%
+      );
+      mix-blend-mode: overlay;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .holo-card-inner:hover .holo-glare {
+      opacity: 1;
+    }
+
+    /* Con trỏ nhấp nháy khi AI đang stream chữ */
+    @keyframes streamCursorBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .stream-cursor::after {
+      content: "▍";
+      display: inline-block;
+      margin-left: 2px;
+      color: #F59E0B;
+      animation: streamCursorBlink 0.8s infinite;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B1120;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1E293B;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#0B1120] text-[#F8FAFC] font-sans antialiased selection:bg-[#F59E0B]/30 selection:text-[#F8FAFC]">
+
+  <!-- ===================================================================== -->
+  <!-- LỚP NỀN VŨ TRỤ ĐA TẦNG, CHÒM SAO & HÌNH NHÂN NGỒI THIỀN HOA SEN       -->
+  <!-- ===================================================================== -->
+  <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    <!-- Aurora Orbs -->
+    <div class="aurora-orb-1 absolute -top-28 -left-24 h-[440px] w-[440px] rounded-full bg-[#F59E0B]/[0.08] blur-[120px]"></div>
+    <div class="aurora-orb-2 absolute top-1/3 -right-32 h-[480px] w-[480px] rounded-full bg-[#6366F1]/[0.10] blur-[130px]"></div>
+    <div class="aurora-orb-1 absolute -bottom-32 left-1/3 h-[420px] w-[420px] rounded-full bg-[#14B8A6]/[0.08] blur-[125px]"></div>
+    <!-- Interactive Multi-Layer Stardust, Constellation Network & Meditating Lotus Figure Canvas -->
+    <canvas id="cosmos-canvas" class="block h-full w-full"></canvas>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- BỘ TỔNG HỢP ÂM THANH WEB AUDIO API + SÓNG NHẠC REAL-TIME (GÓC TRÊN)   -->
+  <!-- ===================================================================== -->
+  <header class="fixed top-4 right-4 sm:top-5 sm:right-5 z-40">
+    <div class="flex items-center gap-2 rounded-full border border-slate-700/70 bg-[#161B26]/85 px-3 py-1.5 backdrop-blur-xl shadow-[0_10px_35px_rgba(0,0,0,0.65)]">
+      <button
+        id="audio-toggle-btn"
+        type="button"
+        onclick="toggleAmbientAudio()"
+        aria-label="Bật hoặc tắt âm thanh nền"
+        class="flex items-center gap-2 rounded-full px-2 py-1 text-xs font-medium text-[#F8FAFC] transition hover:text-[#F59E0B]"
+      >
+        <!-- Real-time Equalizer Bars -->
+        <span class="flex h-3.5 items-end gap-[2px]" aria-hidden="true">
+          <span id="eq-bar-0" class="w-[2.5px] rounded-full bg-slate-500 transition-all duration-75" style="height: 4px;"></span>
+          <span id="eq-bar-1" class="w-[2.5px] rounded-full bg-slate-500 transition-all duration-75" style="height: 8px;"></span>
+          <span id="eq-bar-2" class="w-[2.5px] rounded-full bg-slate-500 transition-all duration-75" style="height: 5px;"></span>
+          <span id="eq-bar-3" class="w-[2.5px] rounded-full bg-slate-500 transition-all duration-75" style="height: 9px;"></span>
+          <span id="eq-bar-4" class="w-[2.5px] rounded-full bg-slate-500 transition-all duration-75" style="height: 4px;"></span>
+        </span>
+        <span id="audio-status-text">Không gian âm</span>
+      </button>
+
+      <!-- 3 Chế độ âm thanh: Mưa đêm, Lo-fi ấm, Chuông xoay 432Hz -->
+      <div id="audio-mode-switcher" class="hidden items-center gap-1 border-l border-slate-700/80 pl-2">
+        <button
+          id="mode-rain-btn"
+          type="button"
+          onclick="switchAudioMode('rain')"
+          class="rounded-full bg-[#F59E0B]/20 px-2.5 py-1 text-[11px] font-semibold text-[#F59E0B] transition"
+        >
+          Mưa đêm
+        </button>
+        <button
+          id="mode-lofi-btn"
+          type="button"
+          onclick="switchAudioMode('lofi')"
+          class="rounded-full px-2.5 py-1 text-[11px] font-medium text-slate-400 hover:text-slate-200 transition"
+        >
+          Lo-fi ấm
+        </button>
+        <button
+          id="mode-bowl-btn"
+          type="button"
+          onclick="switchAudioMode('bowl')"
+          class="rounded-full px-2.5 py-1 text-[11px] font-medium text-slate-400 hover:text-slate-200 transition"
+        >
+          Chuông 432Hz
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- WIDGET CHATBOT CHUYÊN GIA TƯ VẤN TÂM LÝ AI (STREAMING + DEMO MODE)    -->
+  <!-- ===================================================================== -->
+  <div id="ai-counselor-widget" class="fixed bottom-5 right-5 z-50 flex flex-col items-end">
+    <!-- Khung cửa sổ Chat -->
+    <div
+      id="counselor-chat-panel"
+      class="mb-3 hidden w-[calc(100vw-2.5rem)] max-w-[410px] flex-col overflow-hidden rounded-2xl border border-slate-700/80 bg-[#161B26]/95 shadow-[0_25px_70px_rgba(0,0,0,0.88)] backdrop-blur-2xl sm:w-[410px]"
+      style="height: 560px; max-height: calc(100vh - 6.5rem);"
+    >
+      <!-- Header Chatbot -->
+      <div class="flex items-center justify-between border-b border-slate-800/90 bg-[#0B1120]/85 px-4 py-3">
+        <div class="flex items-center gap-2.5">
+          <div class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#F59E0B]/40 bg-[#F59E0B]/15 text-[#F59E0B]">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"></path>
+            </svg>
+            <span class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#0B1120] bg-emerald-400"></span>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h3 class="text-xs font-bold text-[#F8FAFC]">Chuyên gia Tâm lý AI</h3>
+              <button
+                id="counselor-mode-pill"
+                type="button"
+                onclick="toggleCounselorConnectionMode()"
+                title="Chuyển đổi giữa Chế độ Demo xem trước và Backend API /api/chat"
+                class="rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300 transition hover:bg-emerald-500/25"
+              >
+                Demo Xem Trước
+              </button>
+            </div>
+            <p id="counselor-context-badge" class="mt-0.5 text-[11px] text-[#F59E0B]/90">
+              Đồng bộ ngữ cảnh phản chiếu
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <!-- Nút xóa lịch sử chat -->
+          <button
+            type="button"
+            onclick="clearCounselorHistory()"
+            title="Xóa lịch sử trò chuyện"
+            aria-label="Xóa lịch sử trò chuyện"
+            class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-red-400"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+              <path d="M10 11v6"></path>
+              <path d="M14 11v6"></path>
+            </svg>
+          </button>
+          <!-- Nút thu gọn -->
+          <button
+            type="button"
+            onclick="toggleCounselorChat()"
+            title="Thu gọn"
+            aria-label="Thu gọn khung chat"
+            class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Thanh công cụ ngữ cảnh & Đúc kết thông điệp cuối cùng -->
+      <div class="flex flex-wrap items-center justify-between gap-1.5 border-b border-slate-800/70 bg-[#161B26] px-3.5 py-2 text-[11px]">
+        <button
+          id="quick-demo-seed-btn"
+          type="button"
+          onclick="loadDemoReflectionContext()"
+          class="inline-flex items-center gap-1 rounded-full border border-sky-500/40 bg-sky-500/10 px-2.5 py-1 font-medium text-sky-300 transition hover:bg-sky-500/20"
+        >
+          <span>⚡ Nạp phiên mẫu</span>
+        </button>
+
+        <button
+          id="synthesize-final-btn"
+          type="button"
+          onclick="requestFinalTakeawayMessage()"
+          class="inline-flex items-center gap-1 rounded-full border border-[#F59E0B]/45 bg-[#F59E0B]/15 px-2.5 py-1 font-semibold text-[#F59E0B] transition hover:bg-[#F59E0B]/25"
+        >
+          <span>✨ Đúc kết thông điệp cuối</span>
+        </button>
+      </div>
+
+      <!-- Danh sách tin nhắn -->
+      <div id="counselor-messages-box" class="flex-1 space-y-3.5 overflow-y-auto p-4 text-sm">
+        <!-- Render tin nhắn bằng JS -->
+      </div>
+
+      <!-- Gợi ý câu hỏi nhanh -->
+      <div id="counselor-quick-prompts" class="flex gap-1.5 overflow-x-auto border-t border-slate-800/60 bg-[#0B1120]/50 px-3 py-2">
+        <button
+          type="button"
+          onclick="sendQuickCounselorPrompt('Tôi đang thấy hơi mông lung giữa kỳ vọng của người khác và mong muốn thật của mình.')"
+          class="shrink-0 rounded-full border border-slate-700/80 bg-[#161B26] px-2.5 py-1 text-[11px] text-slate-300 transition hover:border-[#F59E0B]/50 hover:text-[#F59E0B]"
+        >
+          Tôi đang thấy mông lung...
+        </button>
+        <button
+          type="button"
+          onclick="sendQuickCounselorPrompt('Hãy phân tích sâu hơn câu trả lời vừa rồi của tôi giúp tôi nhìn ra điểm mù.')"
+          class="shrink-0 rounded-full border border-slate-700/80 bg-[#161B26] px-2.5 py-1 text-[11px] text-slate-300 transition hover:border-[#F59E0B]/50 hover:text-[#F59E0B]"
+        >
+          Soi chiếu điểm mù của tôi
+        </button>
+      </div>
+
+      <!-- Khung nhập tin nhắn -->
+      <form onsubmit="handleCounselorSubmit(event)" class="border-t border-slate-800/90 bg-[#0B1120]/85 p-3">
+        <div class="flex items-end gap-2">
+          <textarea
+            id="counselor-input"
+            rows="1"
+            placeholder="Chia sẻ điều đang khiến bạn bận tâm..."
+            onkeydown="handleCounselorInputKeydown(event)"
+            class="max-h-28 flex-1 resize-none rounded-xl border border-slate-700/80 bg-[#161B26] px-3.5 py-2.5 text-xs leading-relaxed text-[#F8FAFC] placeholder-slate-500 outline-none focus:border-[#F59E0B]"
+          ></textarea>
+          <button
+            id="counselor-send-btn"
+            type="submit"
+            aria-label="Gửi tin nhắn"
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F59E0B] text-[#0B1120] shadow-[0_0_15px_rgba(245,158,11,0.4)] transition hover:bg-[#F59E0B]/90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Nút Bong bóng Chat nổi -->
+    <button
+      id="counselor-bubble-btn"
+      type="button"
+      onclick="toggleCounselorChat()"
+      aria-label="Mở Chuyên gia Tư vấn Tâm lý AI"
+      class="group flex items-center gap-2.5 rounded-full border border-[#F59E0B]/50 bg-[#161B26]/95 px-4 py-3 text-xs font-bold text-[#F8FAFC] shadow-[0_12px_35px_rgba(0,0,0,0.75)] backdrop-blur-xl transition hover:scale-105 hover:border-[#F59E0B]"
+    >
+      <span class="relative flex h-3 w-3">
+        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#F59E0B] opacity-75"></span>
+        <span class="relative inline-flex h-3 w-3 rounded-full bg-[#F59E0B]"></span>
+      </span>
+      <span>Tư vấn Tâm lý AI</span>
+    </button>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center gap-2"></div>
+
+  <!-- ===================================================================== -->
+  <!-- MÀN HÌNH 1: LANDING SCREEN                                            -->
+  <!-- ===================================================================== -->
+  <main id="screen-landing" class="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-20 sm:px-6">
+    <div class="w-full max-w-3xl space-y-10 animate-linear-in">
+      <!-- Thương hiệu & Thông điệp chủ đạo -->
+      <div class="space-y-4 text-center">
+        <div class="inline-flex items-center gap-2 rounded-full border border-[#F59E0B]/35 bg-[#161B26]/80 px-4 py-1.5 text-xs font-semibold tracking-widest text-[#F59E0B] uppercase backdrop-blur-md shadow-[0_0_25px_rgba(245,158,11,0.18)]">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"></path>
+          </svg>
+          AI for you
+        </div>
+
+        <h1 class="text-3xl font-semibold tracking-tight text-[#F8FAFC] sm:text-5xl sm:leading-[1.2]">
+          Câu trả lời nằm ở bên trong bạn —
+          <span class="block mt-1 shimmer-headline font-bold">AI chỉ giúp bạn đặt đúng câu hỏi</span>
+        </h1>
+
+        <p class="mx-auto max-w-xl text-sm leading-relaxed text-slate-300/90 sm:text-base">
+          Không trắc nghiệm, không gán nhãn tính cách. Bước vào một không gian tĩnh tại để đối thoại trung thực với chính mình qua những câu hỏi chạm sâu.
+        </p>
+      </div>
+
+      <!-- 1. Bộ chọn giọng văn AI (3 thẻ SVG động & hiệu ứng nghiêng 3D) -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-semibold tracking-wider text-slate-300 uppercase">
+            1. Chọn giọng văn đồng hành
+          </label>
+          <span class="text-[11px] text-slate-400">Cá nhân hóa sắc thái phản chiếu</span>
+        </div>
+        <div id="tone-selector-grid" class="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
+          <!-- Render bằng JS -->
+        </div>
+      </div>
+
+      <!-- 2. Bộ chọn 4 Hành trình khám phá -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-semibold tracking-wider text-slate-300 uppercase">
+            2. Chọn hành trình khám phá
+          </label>
+          <span class="text-[11px] text-[#F59E0B]/90">Tích hợp AI Hỏi xoáy đáp xoay</span>
+        </div>
+        <div id="track-selector-grid" class="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+          <!-- Render bằng JS -->
+        </div>
+      </div>
+
+      <!-- Nút hành động chính & Nút mở nhanh Hành trình của tôi -->
+      <div class="flex flex-col items-center gap-4 pt-2">
+        <button
+          id="start-session-btn"
+          type="button"
+          onclick="startReflectionSession()"
+          class="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-[#F59E0B] via-[#FBBF24] to-[#F59E0B] bg-[length:200%_auto] px-8 py-4 text-sm font-bold text-[#0B1120] shadow-[0_0_35px_-5px_rgba(245,158,11,0.55)] transition-all duration-300 hover:bg-right hover:scale-[1.015] sm:w-auto"
+        >
+          <span id="start-btn-label">Bắt đầu chế độ "3 câu hỏi chạm sâu" (3 phút)</span>
+          <svg class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onclick="switchScreen('journey')"
+            class="inline-flex items-center gap-2 rounded-full border border-slate-700/70 bg-[#161B26]/75 px-4 py-2 text-xs font-medium text-slate-300 backdrop-blur-md transition hover:border-[#F59E0B]/50 hover:text-[#F8FAFC]"
+          >
+            <svg class="h-3.5 w-3.5 text-[#F59E0B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+            <span>Hành trình của tôi</span>
+            <span id="journey-count-badge" class="rounded-full bg-[#F59E0B]/20 px-2 py-0.5 text-[10px] font-semibold text-[#F59E0B]">0</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="openCounselorChat(false)"
+            class="inline-flex items-center gap-2 rounded-full border border-[#F59E0B]/40 bg-[#F59E0B]/10 px-4 py-2 text-xs font-semibold text-[#F59E0B] backdrop-blur-md transition hover:bg-[#F59E0B]/20"
+          >
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Xem trước Chuyên gia Tâm lý AI</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MÀN HÌNH 2: KHÔNG GIAN TĨNH (FOCUS UI) & AI "HỎI XOÁY ĐÁP XOAY"       -->
+  <!-- ===================================================================== -->
+  <section id="screen-focus" class="relative z-10 hidden min-h-screen flex-col items-center justify-center px-5 py-16 sm:px-6">
+    <!-- Vòng hào quang cảm xúc (Mirror Aura) tự động đổi sắc thái khi người dùng gõ chữ -->
+    <div
+      id="mirror-aura-glow"
+      aria-hidden="true"
+      class="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[420px] w-[420px] sm:h-[560px] sm:w-[560px] rounded-full opacity-25 blur-[110px] transition-all duration-700"
+      style="background: radial-gradient(circle, rgba(245,158,11,0.55) 0%, rgba(99,102,241,0.25) 55%, transparent 75%);"
+    ></div>
+
+    <div class="relative w-full max-w-2xl">
+      <!-- Thanh tiến trình phân đoạn -->
+      <div class="mb-10 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-medium">
+          <div class="flex items-center gap-2.5">
+            <span id="focus-progress-text" class="rounded-full border border-slate-700/80 bg-[#161B26]/80 px-3 py-1 text-[#F8FAFC] backdrop-blur-md">
+              Câu 1/3
+            </span>
+            <span id="aura-emotion-hint" class="text-[11px] text-slate-400 transition-colors duration-500">
+              Không gian tĩnh tại
+            </span>
+          </div>
+
+          <!-- Hiệu ứng sóng thần kinh tinh tế khi kích hoạt Hỏi xoáy đáp xoay -->
+          <div id="adaptive-loading-badge" class="hidden items-center gap-2 rounded-full border border-[#F59E0B]/40 bg-[#F59E0B]/10 px-3.5 py-1 text-[#F59E0B]">
+            <span class="flex h-3 items-center gap-[2px]">
+              <span class="neural-bar h-3 w-[2px] rounded-full bg-[#F59E0B]" style="animation-delay: 0s;"></span>
+              <span class="neural-bar h-3 w-[2px] rounded-full bg-[#F59E0B]" style="animation-delay: 0.15s;"></span>
+              <span class="neural-bar h-3 w-[2px] rounded-full bg-[#F59E0B]" style="animation-delay: 0.3s;"></span>
+              <span class="neural-bar h-3 w-[2px] rounded-full bg-[#F59E0B]" style="animation-delay: 0.45s;"></span>
+            </span>
+            <span>AI đang lắng nghe và điều chỉnh câu hỏi dành riêng cho bạn...</span>
+          </div>
+
+          <div id="adaptive-active-badge" class="hidden items-center gap-1.5 rounded-full border border-[#F59E0B]/35 bg-[#F59E0B]/10 px-3 py-1 text-[#F59E0B]">
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"></path>
+            </svg>
+            <span>Câu hỏi cá nhân hóa theo dòng suy nghĩ của bạn</span>
+          </div>
+        </div>
+
+        <!-- Segmented Progress Bar -->
+        <div id="focus-segmented-bar" class="grid gap-1.5" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+          <!-- Render các phân đoạn tiến trình bằng JS -->
+        </div>
+      </div>
+
+      <!-- Khối câu hỏi duy nhất & Textarea tối giản -->
+      <div id="focus-card-container" class="space-y-7 animate-linear-in">
+        <h2 id="focus-question-text" class="text-2xl font-medium leading-relaxed text-[#F8FAFC] sm:text-3xl sm:leading-[1.45]">
+          <!-- Nội dung câu hỏi -->
+        </h2>
+
+        <div class="spotlight-card rounded-2xl border border-slate-700/80 p-1 shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
+          <textarea
+            id="focus-answer-input"
+            rows="5"
+            placeholder="Viết xuống suy nghĩ chân thật nhất của bạn ngay lúc này..."
+            oninput="handleAnswerInput()"
+            onkeydown="handleAnswerKeydown(event)"
+            class="w-full resize-none rounded-xl bg-transparent p-5 text-base leading-relaxed text-[#F8FAFC] placeholder-slate-500 outline-none disabled:opacity-50"
+          ></textarea>
+          <div class="flex items-center justify-between border-t border-slate-800/80 px-5 py-2.5 text-[11px] text-slate-400">
+            <span id="word-counter-label">0 từ • Gõ tự do, không giới hạn khuôn mẫu</span>
+            <span class="hidden sm:inline">Nhấn <kbd class="rounded bg-slate-800 px-1.5 py-0.5 text-slate-300">Ctrl + Enter</kbd> để tiếp tục</span>
+          </div>
+        </div>
+
+        <!-- Thông báo kiểm duyệt an toàn -->
+        <div id="safety-warning-box" class="hidden items-start gap-2.5 rounded-xl border border-red-500/40 bg-red-950/45 p-4 text-xs leading-relaxed text-red-200 backdrop-blur-md">
+          <svg class="mt-0.5 h-4 w-4 shrink-0 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span id="safety-warning-text"></span>
+        </div>
+
+        <div class="flex items-center justify-end pt-1">
+          <button
+            id="focus-next-btn"
+            type="button"
+            disabled
+            onclick="submitCurrentAnswer()"
+            class="inline-flex items-center gap-2.5 rounded-xl bg-[#F59E0B] px-7 py-3.5 text-sm font-bold text-[#0B1120] shadow-[0_0_25px_-4px_rgba(245,158,11,0.5)] transition hover:bg-[#F59E0B]/90 disabled:cursor-not-allowed disabled:opacity-35 disabled:shadow-none"
+          >
+            <span id="focus-next-label">Tiếp tục</span>
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- MÀN HÌNH 3: CHUYỂN TIẾP NHỊP THỞ — MANDALA HÌNH HỌC THIÊNG            -->
+  <!-- ===================================================================== -->
+  <section id="screen-breathing" class="relative z-10 hidden min-h-screen flex-col items-center justify-center px-6 text-center">
+    <div class="mandala-breath-container relative flex h-72 w-72 items-center justify-center">
+      <!-- Radial Halo -->
+      <div class="absolute inset-4 rounded-full bg-gradient-to-tr from-[#F59E0B]/25 via-[#6366F1]/20 to-[#14B8A6]/25 blur-2xl"></div>
+
+      <!-- Sacred Geometry SVG Mandala -->
+      <svg class="h-72 w-72 drop-shadow-[0_0_25px_rgba(245,158,11,0.35)]" viewBox="0 0 300 300" fill="none">
+        <!-- Outer Sacred Ring -->
+        <g class="mandala-ring-cw">
+          <circle cx="150" cy="150" r="134" stroke="rgba(245, 158, 11, 0.35)" stroke-width="1" stroke-dasharray="4 6" />
+          <circle cx="150" cy="150" r="120" stroke="rgba(99, 102, 241, 0.4)" stroke-width="1.2" />
+          <polygon points="150,22 261,214 39,214" stroke="rgba(245, 158, 11, 0.4)" stroke-width="1.2" />
+          <polygon points="150,278 261,86 39,86" stroke="rgba(20, 184, 166, 0.4)" stroke-width="1.2" />
+        </g>
+
+        <!-- Middle Lotus Petal Ring -->
+        <g class="mandala-ring-ccw">
+          <circle cx="150" cy="150" r="88" stroke="rgba(245, 158, 11, 0.55)" stroke-width="1.5" />
+          <rect x="88" y="88" width="124" height="124" rx="8" stroke="rgba(248, 250, 252, 0.25)" stroke-width="1" />
+          <rect x="88" y="88" width="124" height="124" rx="8" transform="rotate(45 150 150)" stroke="rgba(245, 158, 11, 0.45)" stroke-width="1" />
+          <circle cx="150" cy="62" r="6" fill="#F59E0B" fill-opacity="0.7" />
+          <circle cx="150" cy="238" r="6" fill="#F59E0B" fill-opacity="0.7" />
+          <circle cx="62" cy="150" r="6" fill="#38BDF8" fill-opacity="0.7" />
+          <circle cx="238" cy="150" r="6" fill="#38BDF8" fill-opacity="0.7" />
+        </g>
+
+        <!-- Inner Core -->
+        <circle cx="150" cy="150" r="42" fill="rgba(22, 27, 38, 0.9)" stroke="#F59E0B" stroke-width="1.8" />
+        <circle cx="150" cy="150" r="10" fill="#F59E0B" />
+      </svg>
+    </div>
+
+    <p id="breathing-phase-text" class="mt-6 text-xl font-medium tracking-wide text-[#F8FAFC] transition-all duration-500">
+      Hít vào chậm rãi...
+    </p>
+    <p class="mt-2 max-w-sm text-xs leading-relaxed text-slate-400">
+      Chiếc gương nội tâm đang kết nối các mảnh ghép cảm xúc của bạn trong không gian bảo mật cục bộ...
+    </p>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- MÀN HÌNH 4: KẾT QUẢ & THẺ CHÂN DUNG CÁ NHÂN HOLOGRAPHIC 1080x1920px   -->
+  <!-- ===================================================================== -->
+  <section id="screen-result" class="relative z-10 hidden min-h-screen px-5 py-20 sm:px-6">
+    <div class="mx-auto grid max-w-5xl grid-cols-1 gap-12 lg:grid-cols-12 lg:items-start animate-linear-in">
+      <!-- Cột trái: Bài phân tích chiều sâu & Lời khuyên cá nhân hóa -->
+      <div class="space-y-7 lg:col-span-7">
+        <div class="space-y-3">
+          <div class="inline-flex items-center gap-2 rounded-full border border-[#F59E0B]/35 bg-[#F59E0B]/10 px-3.5 py-1 text-xs font-semibold text-[#F59E0B]">
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"></path>
+            </svg>
+            <span id="result-tone-badge">Góc nhìn phản chiếu • Giọng văn Ấm áp</span>
+          </div>
+          <h2 class="text-2xl font-semibold text-[#F8FAFC] sm:text-3xl">
+            Những gì chiếc gương nội tâm vừa soi thấy
+          </h2>
+        </div>
+
+        <div id="result-reflection-body" class="spotlight-card space-y-4 rounded-2xl border border-slate-800/90 p-6 text-base leading-relaxed text-slate-200 sm:p-8">
+          <!-- Render các đoạn văn phân tích -->
+        </div>
+
+        <!-- Thẻ tóm tắt Điểm mù hiện tại & Thử thách 24 giờ tới -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div class="spotlight-card rounded-2xl border border-slate-800/90 p-5">
+            <div class="flex items-center gap-2 text-xs font-bold tracking-wider text-[#F59E0B] uppercase">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <span>Điểm mù hiện tại</span>
+            </div>
+            <p id="result-blindspot-text" class="mt-2 text-sm leading-relaxed text-slate-300"></p>
+          </div>
+
+          <div class="spotlight-card rounded-2xl border border-slate-800/90 p-5">
+            <div class="flex items-center gap-2 text-xs font-bold tracking-wider text-[#38BDF8] uppercase">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <span>Thử thách 24 giờ tới</span>
+            </div>
+            <p id="result-challenge-text" class="mt-2 text-sm leading-relaxed text-slate-300"></p>
+          </div>
+        </div>
+
+        <!-- Các nút hành động -->
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <button
+            type="button"
+            onclick="openCounselorChat(true)"
+            class="inline-flex items-center gap-2 rounded-xl bg-[#F59E0B] px-5 py-3 text-sm font-bold text-[#0B1120] shadow-[0_0_25px_-5px_rgba(245,158,11,0.55)] transition hover:bg-[#F59E0B]/90"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Trò chuyện với Chuyên gia Tâm lý</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="openTimeCapsuleModal()"
+            class="inline-flex items-center gap-2 rounded-xl border border-[#F59E0B]/50 bg-[#F59E0B]/15 px-5 py-3 text-sm font-semibold text-[#F59E0B] transition hover:bg-[#F59E0B]/25"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 22h14"></path>
+              <path d="M5 2h14"></path>
+              <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path>
+              <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
+            </svg>
+            <span>Hộp thời gian</span>
+          </button>
+
+          <button
+            id="save-journey-btn"
+            type="button"
+            onclick="saveCurrentSessionToJourney()"
+            class="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-[#161B26]/90 px-5 py-3 text-sm font-medium text-slate-200 transition hover:border-[#F59E0B]/60 hover:text-white"
+          >
+            <svg class="h-4 w-4 text-[#F59E0B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>Lưu vào Hành trình</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="switchScreen('landing')"
+            class="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm text-slate-400 transition hover:text-[#F8FAFC]"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            <span>Phiên mới</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cột phải: Thẻ Chân Dung Cá Nhân 9:16 (1080x1920px) + 4 Theme + Holographic 3D -->
+      <div class="flex flex-col items-center space-y-5 lg:col-span-5">
+        <!-- 4 Tùy chọn màu nền: Đêm Sâu, Tĩnh Lặng, Bình Minh, Cực Quang -->
+        <div class="flex flex-wrap items-center justify-center gap-1 rounded-full border border-slate-700/80 bg-[#161B26]/90 p-1.5 backdrop-blur-md">
+          <button
+            id="card-theme-deep-night"
+            type="button"
+            onclick="selectCardTheme('deep-night')"
+            class="rounded-full bg-[#F59E0B] px-3 py-1.5 text-xs font-bold text-[#0B1120] transition"
+          >
+            Đêm Sâu
+          </button>
+          <button
+            id="card-theme-tranquil"
+            type="button"
+            onclick="selectCardTheme('tranquil')"
+            class="rounded-full px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white transition"
+          >
+            Tĩnh Lặng
+          </button>
+          <button
+            id="card-theme-dawn"
+            type="button"
+            onclick="selectCardTheme('dawn')"
+            class="rounded-full px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white transition"
+          >
+            Bình Minh
+          </button>
+          <button
+            id="card-theme-aurora"
+            type="button"
+            onclick="selectCardTheme('aurora')"
+            class="rounded-full px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white transition"
+          >
+            Cực Quang
+          </button>
+        </div>
+
+        <!-- Holographic 3D Card Frame (9:16) -->
+        <div class="holo-card-wrapper w-full max-w-[310px] sm:max-w-[340px]">
+          <div
+            id="holo-card-inner"
+            class="holo-card-inner overflow-hidden rounded-2xl border border-slate-700/80 shadow-[0_28px_65px_-12px_rgba(0,0,0,0.9)]"
+          >
+            <canvas
+              id="insight-canvas"
+              width="1080"
+              height="1920"
+              class="block h-auto w-full"
+              style="aspect-ratio: 9 / 16;"
+            ></canvas>
+            <div class="holo-glare"></div>
+          </div>
+        </div>
+
+        <!-- Nút xuất file PNG 1080x1920px -->
+        <button
+          type="button"
+          onclick="downloadInsightCardPNG()"
+          class="inline-flex items-center gap-2 rounded-xl bg-[#F59E0B] px-6 py-3 text-sm font-bold text-[#0B1120] shadow-[0_0_25px_-5px_rgba(245,158,11,0.5)] transition hover:bg-[#F59E0B]/90"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Tải ảnh thẻ PNG</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- MÀN HÌNH 5: HÀNH TRÌNH CỦA TÔI (MAGIC LINK + SPLINE AREA CHART)       -->
+  <!-- ===================================================================== -->
+  <section id="screen-journey" class="relative z-10 hidden min-h-screen px-5 py-20 sm:px-6">
+    <div class="mx-auto max-w-4xl space-y-8 animate-linear-in">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <button
+          type="button"
+          onclick="switchScreen('landing')"
+          class="inline-flex items-center gap-2 rounded-full border border-slate-700/80 bg-[#161B26]/80 px-4 py-2 text-xs font-medium text-slate-300 backdrop-blur-md transition hover:border-[#F59E0B]/50 hover:text-[#F8FAFC]"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Quay lại không gian chính</span>
+        </button>
+
+        <div id="journey-user-bar" class="hidden items-center gap-3">
+          <span id="journey-user-email" class="rounded-full border border-[#F59E0B]/35 bg-[#161B26]/90 px-3.5 py-1 text-xs font-medium text-[#F59E0B]"></span>
+          <button
+            type="button"
+            onclick="logoutMagicLink()"
+            class="text-xs text-slate-400 underline hover:text-red-400"
+          >
+            Đăng xuất
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <h2 class="text-2xl font-semibold text-[#F8FAFC] sm:text-3xl">Hành trình của tôi</h2>
+        <p class="text-sm text-slate-400">
+          Nhật ký phản chiếu mã hóa AES-256-GCM với quyền truy xuất riêng tư — theo dõi sự chuyển hóa từ khóa và năng lượng cảm xúc qua thời gian.
+        </p>
+      </div>
+
+      <!-- Khối xác thực Magic Link Email -->
+      <div id="magic-link-auth-card" class="spotlight-card max-w-md rounded-2xl border border-slate-800 p-6 sm:p-8">
+        <form id="magic-link-form" onsubmit="sendMagicLinkDemo(event)" class="space-y-4">
+          <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#F59E0B] uppercase">
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Xác thực Magic Link Email
+          </div>
+          <h3 class="text-lg font-semibold text-[#F8FAFC]">Mở khóa nhật ký nội tâm</h3>
+          <p class="text-xs leading-relaxed text-slate-400">
+            Nhập email của bạn để nhận liên kết đăng nhập không mật khẩu và đồng bộ các thẻ chân dung đã lưu.
+          </p>
+          <div>
+            <input
+              id="magic-link-email-input"
+              type="email"
+              required
+              placeholder="ban@example.com"
+              class="w-full rounded-xl border border-slate-700/80 bg-[#0B1120]/90 px-4 py-3 text-sm text-[#F8FAFC] placeholder-slate-500 outline-none focus:border-[#F59E0B]"
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full rounded-xl bg-[#F59E0B] py-3 text-sm font-bold text-[#0B1120] transition hover:bg-[#F59E0B]/90"
+          >
+            Gửi Magic Link Email
+          </button>
+          <button
+            type="button"
+            onclick="quickDemoJourneyLogin()"
+            class="w-full rounded-xl border border-slate-700/80 bg-[#0B1120]/60 py-2.5 text-xs font-medium text-slate-300 transition hover:border-[#F59E0B]/50 hover:text-white"
+          >
+            Xem thử ngay với dữ liệu hành trình mẫu
+          </button>
+        </form>
+
+        <div id="magic-link-sent-state" class="hidden space-y-4 text-center">
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F59E0B]/20 text-[#F59E0B]">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-[#F8FAFC]">Đã gửi liên kết xác thực</h3>
+          <p class="text-xs leading-relaxed text-slate-400">
+            Magic Link bảo mật đã được gửi tới <strong id="magic-link-sent-target" class="text-slate-200"></strong>.
+          </p>
+          <button
+            type="button"
+            onclick="completeMagicLinkLogin()"
+            class="w-full rounded-xl border border-[#F59E0B]/50 bg-[#F59E0B]/15 py-2.5 text-xs font-semibold text-[#F59E0B] transition hover:bg-[#F59E0B]/25"
+          >
+            Xác nhận mở liên kết ngay
+          </button>
+        </div>
+      </div>
+
+      <!-- Dashboard Hành trình của tôi -->
+      <div id="journey-dashboard" class="hidden space-y-8">
+        <!-- SVG Spline Area Chart -->
+        <div class="spotlight-card rounded-2xl border border-slate-800 p-6">
+          <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2 text-sm font-semibold text-[#F59E0B]">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+                <span>Biểu đồ đường cong năng lượng cảm xúc & từ khóa</span>
+              </div>
+              <p id="spline-selected-detail" class="mt-1 text-xs text-slate-400">
+                Chạm vào từng điểm sáng trên đường cong để xem từ khóa và trạng thái ngày hôm đó
+              </p>
+            </div>
+            <button
+              type="button"
+              onclick="seedSampleJourneyRecords()"
+              class="rounded-lg border border-slate-700 bg-[#0B1120]/80 px-3 py-1.5 text-[11px] text-slate-300 transition hover:border-[#F59E0B]/50 hover:text-[#F59E0B]"
+            >
+              + Nạp thêm mốc mẫu
+            </button>
+          </div>
+
+          <div id="spline-chart-container" class="w-full overflow-x-auto">
+            <!-- Render SVG Spline Area Chart bằng JS -->
+          </div>
+        </div>
+
+        <!-- Danh sách Hộp thời gian đã niêm phong -->
+        <div class="space-y-3">
+          <h3 class="text-xs font-bold tracking-wider text-slate-300 uppercase">
+            Hộp thời gian đang chờ mở khóa
+          </h3>
+          <div id="sealed-capsules-list" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <!-- Render bằng JS -->
+          </div>
+        </div>
+
+        <!-- Lịch sử thẻ chân dung đã lưu -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold tracking-wider text-slate-300 uppercase">
+              Thẻ chân dung cá nhân đã lưu
+            </h3>
+            <button
+              type="button"
+              onclick="clearAllJourneyData()"
+              class="text-xs text-slate-500 transition hover:text-red-400"
+            >
+              Xóa toàn bộ nhật ký
+            </button>
+          </div>
+          <div id="saved-cards-grid" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <!-- Render bằng JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: HỘP THỜI GIAN (TIME CAPSULE) & ĐÓNG DẤU SÁP VÀNG (WAX SEAL)    -->
+  <!-- ===================================================================== -->
+  <div id="time-capsule-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-[#0B1120]/85 p-4 backdrop-blur-md">
+    <div class="relative w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-2xl border border-slate-700/80 bg-[#161B26]/95 p-6 shadow-2xl sm:p-8 animate-linear-in">
+      <button
+        type="button"
+        onclick="closeTimeCapsuleModal()"
+        aria-label="Đóng hộp thời gian"
+        class="absolute top-5 right-5 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+      >
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Form viết thư Time Capsule -->
+      <form id="capsule-form-view" onsubmit="sealTimeCapsule(event)" class="space-y-5">
+        <div>
+          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-[#F59E0B] uppercase">
+            Hộp thời gian (Time Capsule)
+          </span>
+          <h3 class="mt-1.5 text-xl font-semibold text-[#F8FAFC]">
+            Gửi thông điệp cho chính bạn ở tương lai
+          </h3>
+          <p class="mt-1 text-xs leading-relaxed text-slate-400">
+            Toàn bộ câu trả lời hôm nay, lời khuyên và bức thư này sẽ được mã hóa AES-256-GCM và tự động gửi về email khi đến hẹn.
+          </p>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-slate-300">Email nhận thư</label>
+          <input
+            id="capsule-email-input"
+            type="email"
+            required
+            placeholder="ban@example.com"
+            class="w-full rounded-xl border border-slate-700/80 bg-[#0B1120] px-4 py-2.5 text-sm text-[#F8FAFC] placeholder-slate-500 outline-none focus:border-[#F59E0B]"
+          />
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-slate-300">Mốc thời gian gửi lại</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button
+              id="delay-3-btn"
+              type="button"
+              onclick="selectCapsuleDelay(3)"
+              class="rounded-xl border border-slate-800 bg-[#0B1120] py-2.5 text-sm font-medium text-slate-400 transition hover:text-slate-200"
+            >
+              Sau 3 tháng
+            </button>
+            <button
+              id="delay-6-btn"
+              type="button"
+              onclick="selectCapsuleDelay(6)"
+              class="rounded-xl border border-[#F59E0B] bg-[#F59E0B]/15 py-2.5 text-sm font-bold text-[#F59E0B] transition"
+            >
+              Sau 6 tháng
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-slate-300">Lời nhắn gửi phiên bản tương lai của bạn</label>
+          <textarea
+            id="capsule-letter-input"
+            rows="4"
+            required
+            placeholder="Chào tôi của 6 tháng sau, hôm nay tôi đang trăn trở về..."
+            class="w-full resize-none rounded-xl border border-slate-700/80 bg-[#0B1120] p-3.5 text-sm leading-relaxed text-[#F8FAFC] placeholder-slate-500 outline-none focus:border-[#F59E0B]"
+          ></textarea>
+        </div>
+
+        <button
+          type="submit"
+          class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#F59E0B] py-3.5 text-sm font-bold text-[#0B1120] shadow-[0_0_25px_-5px_rgba(245,158,11,0.5)] transition hover:bg-[#F59E0B]/90"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Mã hóa AES-256 & Đóng dấu niêm phong</span>
+        </button>
+      </form>
+
+      <!-- Trạng thái đã đóng dấu sáp vàng (Wax Seal Animation) -->
+      <div id="capsule-sealed-view" class="hidden flex-col items-center py-4 text-center">
+        <!-- Wax Seal Stamp SVG -->
+        <div class="animate-wax-seal relative flex h-24 w-24 items-center justify-center">
+          <svg class="h-24 w-24 drop-shadow-[0_10px_25px_rgba(245,158,11,0.55)]" viewBox="0 0 120 120" fill="none">
+            <path d="M60 6C69 6 75 13 83 16C91 19 101 18 106 25C111 32 108 42 111 50C114 58 119 66 116 74C113 82 104 86 99 93C94 100 94 110 86 114C78 118 69 113 60 113C51 113 42 118 34 114C26 110 26 100 21 93C16 86 7 82 4 74C1 66 6 58 9 50C12 42 9 32 14 25C19 18 29 19 37 16C45 13 51 6 60 6Z" fill="url(#waxGrad)" />
+            <circle cx="60" cy="60" r="38" stroke="#0B1120" stroke-opacity="0.35" stroke-width="2.5" />
+            <circle cx="60" cy="60" r="33" stroke="#FEF3C7" stroke-opacity="0.5" stroke-width="1" />
+            <path d="M60 38L65 53L80 58L65 63L60 78L55 63L40 58L55 53L60 38Z" fill="#0B1120" fill-opacity="0.75" />
+            <defs>
+              <linearGradient id="waxGrad" x1="10" y1="10" x2="110" y2="110" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#FBBF24" />
+                <stop offset="0.5" stop-color="#F59E0B" />
+                <stop offset="1" stop-color="#B45309" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <h4 class="mt-4 text-xl font-semibold text-[#F8FAFC]">
+          Bức thư đã được đóng dấu niêm phong
+        </h4>
+        <p class="mt-2 max-w-sm text-xs leading-relaxed text-slate-400">
+          Dữ liệu đã được mã hóa AES-256-GCM. Hệ thống sẽ tự động mở khóa và gửi toàn bộ ký ức hôm nay tới <span id="sealed-recipient-text" class="font-semibold text-slate-200"></span> vào đúng:
+        </p>
+
+        <div id="sealed-unlock-date-box" class="mt-3.5 rounded-xl border border-[#F59E0B]/45 bg-[#0B1120] px-5 py-3 text-sm font-bold text-[#F59E0B]">
+          <!-- Ngày mở khóa -->
+        </div>
+
+        <!-- Nút xem chuỗi mã hóa AES-256-GCM thực tế -->
+        <div class="mt-4 w-full">
+          <button
+            type="button"
+            onclick="toggleCiphertextInspector()"
+            class="text-[11px] font-medium text-slate-400 underline transition hover:text-[#F59E0B]"
+          >
+            Kiểm tra chuỗi đã mã hóa AES-256-GCM
+          </button>
+          <div id="ciphertext-inspector-box" class="mt-2 hidden rounded-xl border border-slate-800 bg-[#0B1120] p-3 text-left font-mono text-[10px] break-all text-emerald-400/90">
+            <!-- Ciphertext -->
+          </div>
+        </div>
+
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <button
+            id="preview-scheduled-email-btn"
+            type="button"
+            onclick="previewLastSealedEmail()"
+            class="rounded-xl border border-[#F59E0B]/50 bg-[#F59E0B]/15 px-4 py-2.5 text-xs font-semibold text-[#F59E0B] transition hover:bg-[#F59E0B]/25"
+          >
+            Xem trước Email gửi sau 6 tháng
+          </button>
+          <button
+            type="button"
+            onclick="closeTimeCapsuleModal()"
+            class="rounded-xl bg-slate-800 px-5 py-2.5 text-xs font-medium text-slate-200 transition hover:bg-slate-700"
+          >
+            Hoàn tất
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL XEM TRƯỚC EMAIL TIME CAPSULE (GIẢI MÃ AES-256-GCM)              -->
+  <!-- ===================================================================== -->
+  <div id="email-preview-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-[#0B1120]/90 p-4 backdrop-blur-md">
+    <div class="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-700 bg-[#161B26] p-6 shadow-2xl sm:p-8 animate-linear-in">
+      <button
+        type="button"
+        onclick="closeEmailPreviewModal()"
+        aria-label="Đóng xem trước email"
+        class="absolute top-5 right-5 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+      >
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="space-y-4">
+        <div class="border-b border-slate-800 pb-3">
+          <span class="text-[11px] font-semibold text-[#F59E0B] uppercase">Bản xem trước Email tự động (Đã giải mã AES-256-GCM)</span>
+          <h4 id="email-preview-subject" class="mt-1 text-base font-bold text-[#F8FAFC]">
+            Thông điệp từ chính bạn 6 tháng trước trên AI for you
+          </h4>
+        </div>
+
+        <div id="email-preview-content" class="space-y-4 text-sm leading-relaxed text-slate-200">
+          <!-- Render nội dung email -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- JAVASCRIPT ENGINE: COSMOS + LOTUS CONSTELLATION, AUDIO, AI, CRYPTO    -->
+  <!-- ===================================================================== -->
+  <script>
+    // =========================================================================
+    // 1. NỀN VŨ TRỤ ĐA TẦNG PARALLAX, CHÒM SAO & HÌNH NHÂN NGỒI THIỀN HOA SEN
+    // =========================================================================
+    (function initCosmosCanvas() {
+      const canvas = document.getElementById('cosmos-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      let width = (canvas.width = window.innerWidth);
+      let height = (canvas.height = window.innerHeight);
+
+      // Tọa độ chuột thực và tọa độ chuột làm mượt (lerp) cho hiệu ứng parallax 3 tầng
+      const pointer = { x: width * 0.5, y: height * 0.5, targetX: width * 0.5, targetY: height * 0.5, active: false };
+
+      // Bảng màu chủ đạo đồng bộ toàn hệ thống
+      const PALETTE = {
+        amber: { hex: '#F59E0B', rgb: '245, 158, 11' },
+        warmGold: { hex: '#FDE68A', rgb: '253, 230, 138' },
+        indigo: { hex: '#6366F1', rgb: '99, 102, 241' },
+        teal: { hex: '#14B8A6', rgb: '20, 184, 166' },
+        sky: { hex: '#38BDF8', rgb: '56, 189, 248' },
+        ivory: { hex: '#F8FAFC', rgb: '248, 250, 252' },
+      };
+
+      const colorPool = [
+        PALETTE.amber,
+        PALETTE.warmGold,
+        PALETTE.indigo,
+        PALETTE.teal,
+        PALETTE.sky,
+        PALETTE.ivory,
+      ];
+
+      // -----------------------------------------------------------------------
+      // A. HỆ THỐNG NGÔI SAO ĐA TẦNG (3 LỚP CHIỀU SÂU PARALLAX)
+      // -----------------------------------------------------------------------
+      let stars = [];
+      function buildStarLayers() {
+        const area = width * height;
+        const total = Math.min(165, Math.max(75, Math.floor(area / 10500)));
+        stars = [];
+
+        for (let i = 0; i < total; i++) {
+          const r = Math.random();
+          // Layer 0: Bụi sao xa (45%), Layer 1: Sao phát sáng trung cảnh (35%), Layer 2: Sao tỏa tia 4 & 6 cánh (20%)
+          const layer = r < 0.45 ? 0 : r < 0.8 ? 1 : 2;
+          const colorObj =
+            layer === 0
+              ? [PALETTE.ivory, PALETTE.indigo, PALETTE.sky][Math.floor(Math.random() * 3)]
+              : colorPool[Math.floor(Math.random() * colorPool.length)];
+
+          stars.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * (0.08 + layer * 0.08),
+            vy: (Math.random() - 0.5) * (0.08 + layer * 0.08) - (0.02 + layer * 0.02),
+            layer,
+            parallax: layer === 0 ? 0.015 : layer === 1 ? 0.036 : 0.068,
+            radius: layer === 0 ? Math.random() * 0.7 + 0.45 : layer === 1 ? Math.random() * 1.1 + 1.1 : Math.random() * 1.3 + 1.9,
+            spikes: layer === 2 ? (Math.random() > 0.45 ? 4 : 6) : 0,
+            spikeRot: Math.random() * Math.PI,
+            spikeRotSpeed: (Math.random() - 0.5) * 0.004,
+            color: colorObj,
+            twinklePhase: Math.random() * Math.PI * 2,
+            twinkleSpeed: 0.018 + Math.random() * 0.028,
+          });
+        }
+      }
+      buildStarLayers();
+
+      // -----------------------------------------------------------------------
+      // B. SAO BĂNG LƯỚT NHẸ ĐỊNH KỲ (SHOOTING STARS)
+      // -----------------------------------------------------------------------
+      const shootingStars = [];
+      let nextShootingStarTime = performance.now() + 2200;
+
+      function spawnShootingStar() {
+        const startX = Math.random() * width * 0.85 + width * 0.1;
+        const startY = Math.random() * height * 0.35;
+        const angle = Math.PI * (0.68 + Math.random() * 0.16); // Lướt chéo từ trên phải xuống trái
+        const speed = 7.5 + Math.random() * 4.5;
+        const colorObj = Math.random() > 0.4 ? PALETTE.warmGold : PALETTE.sky;
+        shootingStars.push({
+          x: startX,
+          y: startY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          length: 110 + Math.random() * 85,
+          life: 0,
+          maxLife: 58 + Math.floor(Math.random() * 24),
+          color: colorObj,
+        });
+      }
+
+      // -----------------------------------------------------------------------
+      // C. HÌNH NHÂN NGỒI THIỀN TƯ THẾ HOA SEN (CONSTELLATION MEDITATOR)
+      //    Kiến tạo 100% từ các đỉnh sao & mạng lưới dây nối chòm sao phát sáng
+      // -----------------------------------------------------------------------
+      // Định nghĩa các đỉnh sao giải phẫu tư thế ngồi thiền hoa sen (tọa độ chuẩn hóa [-1, 1])
+      const FIGURE_NODES = [
+        // 0-7: Đỉnh đầu & Khuôn mặt thanh thoát
+        { id: 'crown',      x: 0.00,  y: -0.86, r: 3.1, color: PALETTE.warmGold, spikes: 6 }, // 0: Luân xa Vương miện
+        { id: 'headTopL',   x: -0.09, y: -0.81, r: 1.8, color: PALETTE.amber,    spikes: 0 }, // 1
+        { id: 'headTopR',   x: 0.09,  y: -0.81, r: 1.8, color: PALETTE.amber,    spikes: 0 }, // 2
+        { id: 'templeL',    x: -0.14, y: -0.71, r: 2.0, color: PALETTE.indigo,   spikes: 0 }, // 3
+        { id: 'templeR',    x: 0.14,  y: -0.71, r: 2.0, color: PALETTE.indigo,   spikes: 0 }, // 4
+        { id: 'thirdEye',   x: 0.00,  y: -0.72, r: 2.9, color: PALETTE.indigo,   spikes: 4 }, // 5: Luân xa Con mắt thứ ba
+        { id: 'cheekL',     x: -0.10, y: -0.60, r: 1.7, color: PALETTE.sky,      spikes: 0 }, // 6
+        { id: 'cheekR',     x: 0.10,  y: -0.60, r: 1.7, color: PALETTE.sky,      spikes: 0 }, // 7
+        { id: 'chin',       x: 0.00,  y: -0.53, r: 2.1, color: PALETTE.warmGold, spikes: 0 }, // 8
+
+        // 9-13: Cổ & Đôi vai mở rộng cân đối
+        { id: 'throat',     x: 0.00,  y: -0.45, r: 2.8, color: PALETTE.sky,      spikes: 4 }, // 9: Luân xa Cổ họng
+        { id: 'collarL',    x: -0.13, y: -0.42, r: 1.9, color: PALETTE.sky,      spikes: 0 }, // 10
+        { id: 'collarR',    x: 0.13,  y: -0.42, r: 1.9, color: PALETTE.sky,      spikes: 0 }, // 11
+        { id: 'shoulderL',  x: -0.32, y: -0.36, r: 2.6, color: PALETTE.amber,    spikes: 4 }, // 12
+        { id: 'shoulderR',  x: 0.32,  y: -0.36, r: 2.6, color: PALETTE.amber,    spikes: 4 }, // 13
+
+        // 14-22: Thân trên, Lồng ngực & Trục cột sống
+        { id: 'heart',      x: 0.00,  y: -0.24, r: 3.1, color: PALETTE.teal,     spikes: 6 }, // 14: Luân xa Tim
+        { id: 'ribL',       x: -0.23, y: -0.18, r: 2.0, color: PALETTE.teal,     spikes: 0 }, // 15
+        { id: 'ribR',       x: 0.23,  y: -0.18, r: 2.0, color: PALETTE.teal,     spikes: 0 }, // 16
+        { id: 'solar',      x: 0.00,  y: -0.05, r: 2.9, color: PALETTE.warmGold, spikes: 4 }, // 17: Luân xa Tùng thái dương
+        { id: 'waistL',     x: -0.17, y: 0.05,  r: 1.9, color: PALETTE.amber,    spikes: 0 }, // 18
+        { id: 'waistR',     x: 0.17,  y: 0.05,  r: 1.9, color: PALETTE.amber,    spikes: 0 }, // 19
+        { id: 'sacral',     x: 0.00,  y: 0.14,  r: 2.8, color: PALETTE.amber,    spikes: 4 }, // 20: Luân xa Xương cùng
+        { id: 'hipL',       x: -0.26, y: 0.22,  r: 2.2, color: PALETTE.amber,    spikes: 0 }, // 21
+        { id: 'hipR',       x: 0.26,  y: 0.22,  r: 2.2, color: PALETTE.amber,    spikes: 0 }, // 22
+        { id: 'root',       x: 0.00,  y: 0.27,  r: 3.0, color: PALETTE.amber,    spikes: 4 }, // 23: Luân xa Gốc
+
+        // 24-31: Cánh tay & Bàn tay thủ ấn thiền định (Chin Mudra)
+        { id: 'elbowL',     x: -0.44, y: -0.04, r: 2.2, color: PALETTE.indigo,   spikes: 0 }, // 24
+        { id: 'elbowR',     x: 0.44,  y: -0.04, r: 2.2, color: PALETTE.indigo,   spikes: 0 }, // 25
+        { id: 'forearmL',   x: -0.52, y: 0.14,  r: 1.9, color: PALETTE.sky,      spikes: 0 }, // 26
+        { id: 'forearmR',   x: 0.52,  y: 0.14,  r: 1.9, color: PALETTE.sky,      spikes: 0 }, // 27
+        { id: 'wristL',     x: -0.56, y: 0.24,  r: 2.1, color: PALETTE.warmGold, spikes: 0 }, // 28
+        { id: 'wristR',     x: 0.56,  y: 0.24,  r: 2.1, color: PALETTE.warmGold, spikes: 0 }, // 29
+        { id: 'mudraL',     x: -0.63, y: 0.21,  r: 2.7, color: PALETTE.warmGold, spikes: 4 }, // 30
+        { id: 'mudraR',     x: 0.63,  y: 0.21,  r: 2.7, color: PALETTE.warmGold, spikes: 4 }, // 31
+
+        // 32-40: Đôi chân xếp bằng tư thế hoa sen vững chãi
+        { id: 'thighL',     x: -0.48, y: 0.30,  r: 2.1, color: PALETTE.teal,     spikes: 0 }, // 32
+        { id: 'thighR',     x: 0.48,  y: 0.30,  r: 2.1, color: PALETTE.teal,     spikes: 0 }, // 33
+        { id: 'kneeL',      x: -0.68, y: 0.39,  r: 2.8, color: PALETTE.amber,    spikes: 4 }, // 34
+        { id: 'kneeR',      x: 0.68,  y: 0.39,  r: 2.8, color: PALETTE.amber,    spikes: 4 }, // 35
+        { id: 'shinL',      x: -0.35, y: 0.45,  r: 2.0, color: PALETTE.indigo,   spikes: 0 }, // 36
+        { id: 'shinR',      x: 0.35,  y: 0.45,  r: 2.0, color: PALETTE.indigo,   spikes: 0 }, // 37
+        { id: 'footL',      x: -0.14, y: 0.35,  r: 2.1, color: PALETTE.warmGold, spikes: 0 }, // 38
+        { id: 'footR',      x: 0.14,  y: 0.35,  r: 2.1, color: PALETTE.warmGold, spikes: 0 }, // 39
+        { id: 'lotusBase',  x: 0.00,  y: 0.47,  r: 2.6, color: PALETTE.amber,    spikes: 4 }, // 40
+      ];
+
+      // Các đường dây nối chòm sao kiến tạo đường nét cơ thể & lưới hình học thiêng bên trong
+      const FIGURE_EDGES = [
+        // Đường viền đầu & khuôn mặt
+        [0, 1], [0, 2], [1, 3], [2, 4], [3, 6], [4, 7], [6, 8], [7, 8],
+        // Lưới nội tâm vùng đầu
+        [0, 5], [1, 5], [2, 5], [3, 5], [4, 5], [5, 6], [5, 7], [5, 8],
+        // Cổ & Đôi vai
+        [8, 9], [9, 10], [9, 11], [10, 12], [11, 13], [6, 10], [7, 11],
+        // Đường viền thân trên & hông
+        [12, 15], [13, 16], [15, 18], [16, 19], [18, 21], [19, 22], [21, 23], [22, 23],
+        // Lưới tam giác chòm sao bên trong lồng ngực & thân
+        [10, 14], [11, 14], [12, 14], [13, 14], [14, 15], [14, 16],
+        [15, 17], [16, 17], [17, 18], [17, 19], [18, 20], [19, 20], [20, 21], [20, 22],
+        // Trục cột sống Sushumna (7 luân xa)
+        [0, 5], [5, 9], [9, 14], [14, 17], [17, 20], [20, 23],
+        // Cánh tay & Bàn tay thủ ấn Mudra
+        [12, 24], [24, 26], [26, 28], [28, 30], [15, 24],
+        [13, 25], [25, 27], [27, 29], [29, 31], [16, 25],
+        // Đôi chân xếp bằng tư thế hoa sen
+        [21, 32], [32, 34], [34, 36], [36, 40], [36, 38], [38, 23], [28, 34],
+        [22, 33], [33, 35], [35, 37], [37, 40], [37, 39], [39, 23], [29, 35],
+        // Lưới liên kết hoa sen dưới đế
+        [23, 40], [38, 39], [21, 38], [22, 39], [32, 38], [33, 39],
+      ];
+
+      // 7 Điểm Luân Xa dọc trục sống lưng đồng bộ nhịp thở 7.5 giây
+      const CHAKRAS = [
+        { nodeIdx: 23, name: 'Muladhara',    color: PALETTE.amber,    phaseOffset: 0.00 },
+        { nodeIdx: 20, name: 'Svadhisthana', color: PALETTE.warmGold, phaseOffset: 0.12 },
+        { nodeIdx: 17, name: 'Manipura',     color: PALETTE.warmGold, phaseOffset: 0.24 },
+        { nodeIdx: 14, name: 'Anahata',      color: PALETTE.teal,     phaseOffset: 0.36 },
+        { nodeIdx: 9,  name: 'Vishuddha',    color: PALETTE.sky,      phaseOffset: 0.48 },
+        { nodeIdx: 5,  name: 'Ajna',         color: PALETTE.indigo,   phaseOffset: 0.60 },
+        { nodeIdx: 0,  name: 'Sahasrara',    color: PALETTE.ivory,    phaseOffset: 0.72 },
+      ];
+
+      // Các hạt xung ánh sáng (Energy Pulses) chạy dọc theo dây nối chòm sao
+      const energyPulses = [];
+      for (let i = 0; i < 26; i++) {
+        energyPulses.push({
+          isFigureEdge: i < 16,
+          edgeIdx: i < 16 ? Math.floor(Math.random() * FIGURE_EDGES.length) : -1,
+          starA: 0,
+          starB: 1,
+          t: Math.random(),
+          speed: 0.0045 + Math.random() * 0.0065,
+          size: 1.8 + Math.random() * 1.4,
+        });
+      }
+
+      // Các hạt bụi sao bay nhẹ lên từ hình nhân thiền định hòa vào vũ trụ
+      const figureStardust = Array.from({ length: 38 }, () => ({
+        rx: (Math.random() - 0.5) * 1.15,
+        ry: (Math.random() - 0.3) * 0.9,
+        vy: -(0.0014 + Math.random() * 0.0022),
+        vx: (Math.random() - 0.5) * 0.0008,
+        radius: 0.9 + Math.random() * 1.6,
+        alpha: Math.random(),
+        color: colorPool[Math.floor(Math.random() * colorPool.length)],
+      }));
+
+      // -----------------------------------------------------------------------
+      // D. CÁC HÀM VẼ ĐỒ HỌA CHÒM SAO & HIỆU ỨNG ÁNH SÁNG
+      // -----------------------------------------------------------------------
+      // Vẽ ngôi sao tỏa tia 4 cánh hoặc 6 cánh lấp lánh
+      function drawStarSpikes(x, y, radius, spikes, colorRgb, alpha, rotation = 0) {
+        if (alpha <= 0.02) return;
+        ctx.save();
+        ctx.translate(x, y);
+
+        // Quầng sáng mềm xung quanh lõi sao
+        const glowRadius = radius * (spikes > 0 ? 5.2 : 3.2);
+        const radGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, glowRadius);
+        radGrad.addColorStop(0, `rgba(${colorRgb}, ${Math.min(1, alpha * 0.85)})`);
+        radGrad.addColorStop(0.35, `rgba(${colorRgb}, ${alpha * 0.28})`);
+        radGrad.addColorStop(1, `rgba(${colorRgb}, 0)`);
+        ctx.fillStyle = radGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, glowRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Vẽ tia sáng nhọn 4 cánh hoặc 6 cánh
+        if (spikes > 0) {
+          ctx.rotate(rotation);
+          const longRay = radius * 6.8;
+          const shortRay = radius * 3.8;
+          const rayThickness = Math.max(0.65, radius * 0.34);
+
+          for (let s = 0; s < spikes; s++) {
+            const angle = (s * Math.PI * 2) / spikes;
+            const len = s % 2 === 0 ? longRay : shortRay;
+            ctx.save();
+            ctx.rotate(angle);
+
+            const rayGrad = ctx.createLinearGradient(0, 0, len, 0);
+            rayGrad.addColorStop(0, `rgba(248, 250, 252, ${alpha})`);
+            rayGrad.addColorStop(0.35, `rgba(${colorRgb}, ${alpha * 0.75})`);
+            rayGrad.addColorStop(1, `rgba(${colorRgb}, 0)`);
+
+            ctx.fillStyle = rayGrad;
+            ctx.beginPath();
+            ctx.moveTo(0, -rayThickness);
+            ctx.lineTo(len, 0);
+            ctx.lineTo(0, rayThickness);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+          }
+        }
+
+        // Lõi sao trắng ngà tinh khiết
+        ctx.fillStyle = `rgba(248, 250, 252, ${Math.min(1, alpha * 1.15)})`;
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 0.62, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // Vẽ dây nối chòm sao có chuyển sắc linearGradient giữa 2 nút
+      function drawGradientEdge(x1, y1, x2, y2, rgb1, rgb2, alpha, lineWidth = 0.9) {
+        if (alpha <= 0.01) return;
+        const grad = ctx.createLinearGradient(x1, y1, x2, y2);
+        grad.addColorStop(0, `rgba(${rgb1}, ${alpha})`);
+        grad.addColorStop(1, `rgba(${rgb2}, ${alpha})`);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = lineWidth;
+        ctx.stroke();
+      }
+
+      // Vẽ vòng định vị nút sao khi rê chuột gần (Targeting Reticle)
+      function drawStarReticle(x, y, colorRgb, intensity, time) {
+        if (intensity <= 0.05) return;
+        ctx.save();
+        ctx.translate(x, y);
+
+        // Vòng ngoài xoay đứt nét
+        ctx.save();
+        ctx.rotate(time * 0.0012);
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = `rgba(${colorRgb}, ${intensity * 0.75})`;
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.arc(0, 0, 14 + intensity * 4, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        // Vòng trong mảnh sắc nét
+        ctx.strokeStyle = `rgba(253, 230, 138, ${intensity * 0.6})`;
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.arc(0, 0, 7.5, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // 4 vạch định vị 4 hướng
+        const innerTick = 10;
+        const outerTick = 15;
+        ctx.strokeStyle = `rgba(${colorRgb}, ${intensity * 0.9})`;
+        ctx.lineWidth = 1.2;
+        for (let i = 0; i < 4; i++) {
+          const a = (i * Math.PI) / 2;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(a) * innerTick, Math.sin(a) * innerTick);
+          ctx.lineTo(Math.cos(a) * outerTick, Math.sin(a) * outerTick);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      // Vẽ vòng hào quang sao xoay chậm phía sau đầu hình nhân thiền định
+      function drawMeditatorHalo(headX, headY, scale, breathWave, time) {
+        const outerR = scale * 0.29;
+        const innerR = scale * 0.205;
+
+        ctx.save();
+        ctx.translate(headX, headY);
+
+        // Quầng sáng hào quang ấm áp phía sau đầu
+        const haloGlow = ctx.createRadialGradient(0, 0, innerR * 0.2, 0, 0, outerR * 1.45);
+        haloGlow.addColorStop(0, `rgba(245, 158, 11, ${0.14 + breathWave * 0.08})`);
+        haloGlow.addColorStop(0.55, `rgba(99, 102, 241, ${0.07 + breathWave * 0.04})`);
+        haloGlow.addColorStop(1, 'rgba(11, 17, 32, 0)');
+        ctx.fillStyle = haloGlow;
+        ctx.beginPath();
+        ctx.arc(0, 0, outerR * 1.45, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Vòng hào quang ngoài xoay thuận chiều kim đồng hồ (12 ngôi sao chòm sao)
+        ctx.save();
+        ctx.rotate(time * 0.00018);
+        ctx.strokeStyle = 'rgba(245, 158, 11, 0.26)';
+        ctx.lineWidth = 0.9;
+        ctx.setLineDash([3, 5]);
+        ctx.beginPath();
+        ctx.arc(0, 0, outerR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const outerCount = 12;
+        for (let i = 0; i < outerCount; i++) {
+          const a1 = (i * Math.PI * 2) / outerCount;
+          const a2 = ((i + 1) * Math.PI * 2) / outerCount;
+          const x1 = Math.cos(a1) * outerR;
+          const y1 = Math.sin(a1) * outerR;
+          const x2 = Math.cos(a2) * outerR;
+          const y2 = Math.sin(a2) * outerR;
+
+          drawGradientEdge(x1, y1, x2, y2, PALETTE.amber.rgb, PALETTE.warmGold.rgb, 0.24, 0.8);
+          drawStarSpikes(
+            x1,
+            y1,
+            i % 3 === 0 ? 1.8 : 1.1,
+            i % 3 === 0 ? 4 : 0,
+            i % 2 === 0 ? PALETTE.warmGold.rgb : PALETTE.sky.rgb,
+            0.68,
+            time * 0.0006
+          );
+        }
+        ctx.restore();
+
+        // Vòng hào quang trong xoay ngược chiều kim đồng hồ (Hình học thiêng 8 đỉnh)
+        ctx.save();
+        ctx.rotate(-time * 0.00026);
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.24)';
+        ctx.lineWidth = 0.85;
+        ctx.beginPath();
+        ctx.arc(0, 0, innerR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // 2 hình vuông lồng nhau tạo bát giác sao
+        for (let sq = 0; sq < 2; sq++) {
+          ctx.save();
+          ctx.rotate((sq * Math.PI) / 4);
+          ctx.strokeStyle = sq === 0 ? 'rgba(253, 230, 138, 0.22)' : 'rgba(99, 102, 241, 0.22)';
+          ctx.lineWidth = 0.75;
+          const side = innerR * Math.SQRT2;
+          ctx.strokeRect(-side / 2, -side / 2, side, side);
+          ctx.restore();
+        }
+        ctx.restore();
+
+        ctx.restore();
+      }
+
+      // -----------------------------------------------------------------------
+      // E. VÒNG LẶP ANIMATION CHÍNH (60FPS)
+      // -----------------------------------------------------------------------
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        buildStarLayers();
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        pointer.targetX = e.clientX;
+        pointer.targetY = e.clientY;
+        pointer.active = true;
+      });
+
+      window.addEventListener('pointerleave', () => {
+        pointer.active = false;
+      });
+
+      function animateCosmos(now) {
+        ctx.clearRect(0, 0, width, height);
+
+        // Làm mượt chuyển động con trỏ cho hiệu ứng parallax 3 tầng
+        pointer.x += (pointer.targetX - pointer.x) * 0.075;
+        pointer.y += (pointer.targetY - pointer.y) * 0.075;
+        const offsetX = pointer.x - width * 0.5;
+        const offsetY = pointer.y - height * 0.5;
+
+        // Chu kỳ nhịp thở chuẩn 7.5 giây (7500ms): 0 -> 1 (Hít vào) -> 0 (Thở ra)
+        const breathCycle = (now % 7500) / 7500;
+        const breathWave = 0.5 - 0.5 * Math.cos(breathCycle * Math.PI * 2);
+
+        // 1. Vẽ quầng sáng dịu quanh con trỏ chuột
+        if (pointer.active) {
+          const cursorGlow = ctx.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, 230);
+          cursorGlow.addColorStop(0, 'rgba(245, 158, 11, 0.08)');
+          cursorGlow.addColorStop(0.5, 'rgba(56, 189, 248, 0.03)');
+          cursorGlow.addColorStop(1, 'transparent');
+          ctx.fillStyle = cursorGlow;
+          ctx.fillRect(0, 0, width, height);
+        }
+
+        // 2. Cập nhật tọa độ hiển thị của 3 lớp sao parallax
+        const renderedStars = [];
+        for (let i = 0; i < stars.length; i++) {
+          const s = stars[i];
+          s.x += s.vx;
+          s.y += s.vy;
+          s.twinklePhase += s.twinkleSpeed;
+          s.spikeRot += s.spikeRotSpeed;
+
+          if (s.x < -20) s.x = width + 20;
+          if (s.x > width + 20) s.x = -20;
+          if (s.y < -20) s.y = height + 20;
+          if (s.y > height + 20) s.y = -20;
+
+          const rx = s.x - offsetX * s.parallax;
+          const ry = s.y - offsetY * s.parallax;
+          const alpha = (s.layer === 0 ? 0.35 : 0.62) + 0.38 * Math.sin(s.twinklePhase);
+
+          renderedStars.push({ ...s, rx, ry, alpha });
+        }
+
+        // 3. Vẽ mạng lưới dây nối chòm sao chuyển sắc linearGradient (Layer 1 & 2)
+        const ambientEdges = [];
+        const maxLinkDist = Math.min(145, Math.max(105, width * 0.095));
+        for (let i = 0; i < renderedStars.length; i++) {
+          const a = renderedStars[i];
+          if (a.layer === 0) continue;
+          for (let j = i + 1; j < renderedStars.length; j++) {
+            const b = renderedStars[j];
+            if (b.layer === 0) continue;
+            const dist = Math.hypot(a.rx - b.rx, a.ry - b.ry);
+            if (dist < maxLinkDist) {
+              const edgeAlpha = (1 - dist / maxLinkDist) * 0.24;
+              drawGradientEdge(a.rx, a.ry, b.rx, b.ry, a.color.rgb, b.color.rgb, edgeAlpha, 0.85);
+              ambientEdges.push({ a, b });
+            }
+          }
+        }
+
+        // 4. Vẽ các ngôi sao 3 tầng & vòng định vị reticle khi rê chuột gần
+        for (let i = 0; i < renderedStars.length; i++) {
+          const s = renderedStars[i];
+          drawStarSpikes(s.rx, s.ry, s.radius, s.spikes, s.color.rgb, s.alpha, s.spikeRot);
+
+          if (pointer.active && s.layer >= 1) {
+            const distToMouse = Math.hypot(pointer.x - s.rx, pointer.y - s.ry);
+            if (distToMouse < 165) {
+              const focusRatio = 1 - distToMouse / 165;
+              drawGradientEdge(
+                s.rx,
+                s.ry,
+                pointer.x,
+                pointer.y,
+                s.color.rgb,
+                PALETTE.warmGold.rgb,
+                focusRatio * 0.38,
+                0.95
+              );
+              if (distToMouse < 95) {
+                drawStarReticle(s.rx, s.ry, s.color.rgb, 1 - distToMouse / 95, now);
+              }
+            }
+          }
+        }
+
+        // 5. Vẽ sao băng lướt nhẹ định kỳ
+        if (now >= nextShootingStarTime) {
+          spawnShootingStar();
+          nextShootingStarTime = now + 3600 + Math.random() * 3400;
+        }
+        for (let i = shootingStars.length - 1; i >= 0; i--) {
+          const st = shootingStars[i];
+          st.x += st.vx;
+          st.y += st.vy;
+          st.life++;
+
+          const progress = st.life / st.maxLife;
+          const fade = Math.sin(progress * Math.PI);
+          const mag = Math.hypot(st.vx, st.vy);
+          const tailX = st.x - (st.vx / mag) * st.length;
+          const tailY = st.y - (st.vy / mag) * st.length;
+
+          const tailGrad = ctx.createLinearGradient(st.x, st.y, tailX, tailY);
+          tailGrad.addColorStop(0, `rgba(253, 230, 138, ${fade * 0.9})`);
+          tailGrad.addColorStop(0.35, `rgba(${st.color.rgb}, ${fade * 0.45})`);
+          tailGrad.addColorStop(1, 'rgba(11, 17, 32, 0)');
+
+          ctx.beginPath();
+          ctx.moveTo(st.x, st.y);
+          ctx.lineTo(tailX, tailY);
+          ctx.strokeStyle = tailGrad;
+          ctx.lineWidth = 2;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+
+          drawStarSpikes(st.x, st.y, 2.1, 4, PALETTE.warmGold.rgb, fade, progress * 2);
+
+          if (st.life >= st.maxLife) {
+            shootingStars.splice(i, 1);
+          }
+        }
+
+        // 6. VẼ HÌNH NHÂN NGỒI THIỀN TƯ THẾ HOA SEN Ở TRUNG TÂM MÀN HÌNH
+        const figScale = Math.max(155, Math.min(width * 0.42, height * 0.41));
+        const figCenterX = width * 0.5 - offsetX * 0.025;
+        const figCenterY = height * 0.54 - offsetY * 0.025 - breathWave * 7;
+
+        // Tính mức độ tương tác khi chuột tiến lại gần hình nhân
+        const distPointerToFigure = pointer.active
+          ? Math.hypot(pointer.x - figCenterX, pointer.y - figCenterY)
+          : 9999;
+        const figHoverBoost = pointer.active
+          ? Math.max(0, 1 - distPointerToFigure / (figScale * 1.35))
+          : 0;
+
+        // Hào quang nền dịu phía sau hình nhân
+        const auraGrad = ctx.createRadialGradient(
+          figCenterX,
+          figCenterY - figScale * 0.1,
+          figScale * 0.05,
+          figCenterX,
+          figCenterY - figScale * 0.05,
+          figScale * 0.95
+        );
+        auraGrad.addColorStop(0, `rgba(245, 158, 11, ${0.11 + breathWave * 0.06 + figHoverBoost * 0.08})`);
+        auraGrad.addColorStop(0.5, `rgba(20, 184, 166, ${0.05 + breathWave * 0.03})`);
+        auraGrad.addColorStop(1, 'rgba(11, 17, 32, 0)');
+        ctx.fillStyle = auraGrad;
+        ctx.beginPath();
+        ctx.arc(figCenterX, figCenterY - figScale * 0.05, figScale * 0.95, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Tính tọa độ màn hình của từng đỉnh sao trên cơ thể thiền định
+        const screenFigNodes = FIGURE_NODES.map((n, idx) => {
+          // Nhịp thở làm lồng ngực & vai nở nhẹ tự nhiên
+          const chestExpand =
+            idx === 12 || idx === 13 || idx === 15 || idx === 16
+              ? 1 + breathWave * 0.035
+              : 1;
+          return {
+            ...n,
+            sx: figCenterX + n.x * chestExpand * figScale,
+            sy: figCenterY + n.y * figScale,
+          };
+        });
+
+        // 6a. Vòng hào quang sao xoay chậm phía sau đầu
+        const headCenterNode = screenFigNodes[5]; // Vị trí vùng đầu / Ajna
+        drawMeditatorHalo(headCenterNode.sx, headCenterNode.sy + figScale * 0.02, figScale, breathWave, now);
+
+        // 6b. Vẽ mạng lưới dây nối chòm sao kiến tạo hình nhân ngồi thiền hoa sen
+        const baseEdgeAlpha = 0.34 + breathWave * 0.14 + figHoverBoost * 0.28;
+        for (let i = 0; i < FIGURE_EDGES.length; i++) {
+          const [idxA, idxB] = FIGURE_EDGES[i];
+          const nodeA = screenFigNodes[idxA];
+          const nodeB = screenFigNodes[idxB];
+          drawGradientEdge(
+            nodeA.sx,
+            nodeA.sy,
+            nodeB.sx,
+            nodeB.sy,
+            nodeA.color.rgb,
+            nodeB.color.rgb,
+            baseEdgeAlpha,
+            1.15 + figHoverBoost * 0.45
+          );
+        }
+
+        // 6c. Trục cột sống ánh sáng nối 7 Luân Xa & Sóng năng lượng đồng bộ nhịp thở 7.5s
+        const rootNode = screenFigNodes[23];
+        const crownNode = screenFigNodes[0];
+        const spineGrad = ctx.createLinearGradient(rootNode.sx, rootNode.sy, crownNode.sx, crownNode.sy);
+        spineGrad.addColorStop(0, `rgba(${PALETTE.amber.rgb}, ${0.55 + breathWave * 0.3})`);
+        spineGrad.addColorStop(0.5, `rgba(${PALETTE.teal.rgb}, ${0.65 + breathWave * 0.3})`);
+        spineGrad.addColorStop(1, `rgba(${PALETTE.warmGold.rgb}, ${0.75 + breathWave * 0.25})`);
+        ctx.beginPath();
+        ctx.moveTo(rootNode.sx, rootNode.sy);
+        ctx.lineTo(crownNode.sx, crownNode.sy);
+        ctx.strokeStyle = spineGrad;
+        ctx.lineWidth = 1.8 + breathWave * 0.8;
+        ctx.stroke();
+
+        // Vẽ 7 điểm luân xa phát sóng năng lượng đồng bộ nhịp thở 7.5 giây
+        for (let c = 0; c < CHAKRAS.length; c++) {
+          const chakra = CHAKRAS[c];
+          const cNode = screenFigNodes[chakra.nodeIdx];
+          const localCycle = (breathCycle + chakra.phaseOffset) % 1;
+          const waveRadius = (6 + localCycle * 26) * (figScale / 260);
+          const waveAlpha = (1 - localCycle) * (0.48 + figHoverBoost * 0.25);
+
+          // Vòng sóng năng lượng lan tỏa theo nhịp thở
+          ctx.beginPath();
+          ctx.arc(cNode.sx, cNode.sy, waveRadius, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(${chakra.color.rgb}, ${waveAlpha})`;
+          ctx.lineWidth = 1.25;
+          ctx.stroke();
+
+          // Vòng sóng thứ 2 lệch pha nửa chu kỳ
+          const localCycle2 = (localCycle + 0.5) % 1;
+          const waveRadius2 = (6 + localCycle2 * 26) * (figScale / 260);
+          const waveAlpha2 = (1 - localCycle2) * 0.32;
+          ctx.beginPath();
+          ctx.arc(cNode.sx, cNode.sy, waveRadius2, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(${PALETTE.warmGold.rgb}, ${waveAlpha2})`;
+          ctx.lineWidth = 0.85;
+          ctx.stroke();
+        }
+
+        // 6d. Vẽ toàn bộ 41 đỉnh sao trên cơ thể ngồi thiền hoa sen + kết nối khi rê chuột gần
+        for (let i = 0; i < screenFigNodes.length; i++) {
+          const fn = screenFigNodes[i];
+          const pulseAlpha = 0.68 + 0.22 * Math.sin(now * 0.003 + i * 0.5) + figHoverBoost * 0.25;
+          drawStarSpikes(
+            fn.sx,
+            fn.sy,
+            fn.r * (0.85 + figScale / 420),
+            fn.spikes,
+            fn.color.rgb,
+            Math.min(1, pulseAlpha),
+            now * 0.0005 + i
+          );
+
+          // Kết nối dây chòm sao & vòng định vị khi rê chuột gần hình nhân
+          if (pointer.active) {
+            const dMouse = Math.hypot(pointer.x - fn.sx, pointer.y - fn.sy);
+            if (dMouse < 150) {
+              const ratio = 1 - dMouse / 150;
+              drawGradientEdge(
+                fn.sx,
+                fn.sy,
+                pointer.x,
+                pointer.y,
+                fn.color.rgb,
+                PALETTE.warmGold.rgb,
+                ratio * 0.55,
+                1.1
+              );
+              if (dMouse < 85) {
+                drawStarReticle(fn.sx, fn.sy, fn.color.rgb, 1 - dMouse / 85, now);
+              }
+            }
+          }
+        }
+
+        // 6e. Các hạt bụi sao bay nhẹ lên từ hình nhân thiền định hòa vào vũ trụ
+        for (let i = 0; i < figureStardust.length; i++) {
+          const d = figureStardust[i];
+          d.ry += d.vy;
+          d.rx += d.vx + Math.sin(now * 0.001 + i) * 0.0003;
+
+          if (d.ry < -1.15) {
+            d.ry = 0.35 + Math.random() * 0.15;
+            d.rx = (Math.random() - 0.5) * 1.1;
+          }
+
+          const px = figCenterX + d.rx * figScale;
+          const py = figCenterY + d.ry * figScale;
+          const heightFade = Math.max(0, Math.min(1, (d.ry + 1.15) * 1.2)) * (0.45 + breathWave * 0.25);
+
+          drawStarSpikes(px, py, d.radius, 0, d.color.rgb, heightFade, 0);
+        }
+
+        // 7. Vẽ các hạt xung ánh sáng (Energy Pulses) chạy dọc theo dây nối chòm sao
+        for (let i = 0; i < energyPulses.length; i++) {
+          const p = energyPulses[i];
+          p.t += p.speed;
+
+          let x1, y1, x2, y2, rgb;
+          if (p.isFigureEdge) {
+            if (p.t >= 1) {
+              p.t = 0;
+              p.edgeIdx = Math.floor(Math.random() * FIGURE_EDGES.length);
+            }
+            const [idxA, idxB] = FIGURE_EDGES[p.edgeIdx];
+            x1 = screenFigNodes[idxA].sx;
+            y1 = screenFigNodes[idxA].sy;
+            x2 = screenFigNodes[idxB].sx;
+            y2 = screenFigNodes[idxB].sy;
+            rgb = screenFigNodes[idxA].color.rgb;
+          } else {
+            if (ambientEdges.length === 0) continue;
+            if (p.t >= 1 || p.starA >= ambientEdges.length) {
+              p.t = 0;
+              p.starA = Math.floor(Math.random() * ambientEdges.length);
+            }
+            const edge = ambientEdges[p.starA];
+            x1 = edge.a.rx;
+            y1 = edge.a.ry;
+            x2 = edge.b.rx;
+            y2 = edge.b.ry;
+            rgb = edge.a.color.rgb;
+          }
+
+          const px = x1 + (x2 - x1) * p.t;
+          const py = y1 + (y2 - y1) * p.t;
+          const pulseFade = Math.sin(p.t * Math.PI) * (p.isFigureEdge ? 0.92 : 0.72);
+
+          // Đuôi vệt xung ánh sáng
+          const tailT = Math.max(0, p.t - 0.18);
+          const tx = x1 + (x2 - x1) * tailT;
+          const ty = y1 + (y2 - y1) * tailT;
+          drawGradientEdge(px, py, tx, ty, PALETTE.warmGold.rgb, rgb, pulseFade * 0.75, 1.6);
+
+          // Hạt nhân xung ánh sáng
+          drawStarSpikes(px, py, p.size, 0, PALETTE.warmGold.rgb, pulseFade, 0);
+        }
+
+        requestAnimationFrame(animateCosmos);
+      }
+
+      requestAnimationFrame(animateCosmos);
+    })();
+
+    // =========================================================================
+    // 2. HIỆU ỨNG SPOTLIGHT BORDER & NGHIÊNG 3D CHO THẺ GLASSMORPHISM
+    // =========================================================================
+    document.addEventListener('pointermove', (e) => {
+      document.querySelectorAll('.spotlight-card').forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+      });
+
+      if (e.pointerType === 'mouse') {
+        document.querySelectorAll('.tilt-3d').forEach((el) => {
+          const rect = el.getBoundingClientRect();
+          const inside =
+            e.clientX >= rect.left &&
+            e.clientX <= rect.right &&
+            e.clientY >= rect.top &&
+            e.clientY <= rect.bottom;
+          if (inside) {
+            const relX = (e.clientX - rect.left) / rect.width - 0.5;
+            const relY = (e.clientY - rect.top) / rect.height - 0.5;
+            el.style.transform = `perspective(900px) rotateX(${(-relY * 7).toFixed(2)}deg) rotateY(${(relX * 7).toFixed(2)}deg) translateY(-2px)`;
+          } else {
+            el.style.transform = '';
+          }
+        });
+
+        const holoCard = document.getElementById('holo-card-inner');
+        if (holoCard && !document.getElementById('screen-result').classList.contains('hidden')) {
+          const rect = holoCard.getBoundingClientRect();
+          const inside =
+            e.clientX >= rect.left &&
+            e.clientX <= rect.right &&
+            e.clientY >= rect.top &&
+            e.clientY <= rect.bottom;
+          if (inside) {
+            const px = ((e.clientX - rect.left) / rect.width) * 100;
+            const py = ((e.clientY - rect.top) / rect.height) * 100;
+            const rotY = ((px - 50) / 50) * 10;
+            const rotX = -((py - 50) / 50) * 10;
+            holoCard.style.transform = `rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale(1.02)`;
+            holoCard.style.setProperty('--glare-x', `${px.toFixed(1)}%`);
+            holoCard.style.setProperty('--glare-y', `${py.toFixed(1)}%`);
+          } else {
+            holoCard.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+          }
+        }
+      }
+    });
+
+    // =========================================================================
+    // 3. BỘ TỔNG HỢP ÂM THANH WEB AUDIO API (3 CHẾ ĐỘ + REAL-TIME VISUALIZER)
+    // =========================================================================
+    let audioCtx = null;
+    let masterGain = null;
+    let analyserNode = null;
+    let isAudioPlaying = false;
+    let audioMode = 'rain';
+    let soundTimer = null;
+    let visualizerRaf = null;
+    let activeAudioNodes = [];
+
+    function stopAmbientNodes() {
+      if (soundTimer) {
+        clearInterval(soundTimer);
+        soundTimer = null;
+      }
+      activeAudioNodes.forEach((node) => {
+        try {
+          if (typeof node.stop === 'function') node.stop();
+          node.disconnect();
+        } catch (e) {}
+      });
+      activeAudioNodes = [];
+    }
+
+    function playNightRainSynthesis(ctx, destination) {
+      const bufferSize = ctx.sampleRate * 3;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const output = buffer.getChannelData(0);
+
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + white * 0.0555179;
+        b1 = 0.99332 * b1 + white * 0.0750759;
+        b2 = 0.96900 * b2 + white * 0.1538520;
+        b3 = 0.86650 * b3 + white * 0.3104856;
+        b4 = 0.55000 * b4 + white * 0.5329522;
+        b5 = -0.7616 * b5 - white * 0.0168980;
+        output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.045;
+        b6 = white * 0.115926;
+      }
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 950;
+
+      noise.connect(filter);
+      filter.connect(destination);
+      noise.start();
+      activeAudioNodes.push(noise, filter);
+    }
+
+    function playWarmLofiSynthesis(ctx, destination) {
+      const chords = [
+        [174.61, 220.0, 261.63, 329.63],
+        [164.81, 196.0, 246.94, 293.66],
+        [146.83, 174.61, 220.0, 261.63],
+        [130.81, 164.81, 196.0, 246.94],
+      ];
+      let step = 0;
+
+      const triggerChord = () => {
+        const now = ctx.currentTime;
+        const chord = chords[step % chords.length];
+        step++;
+
+        chord.forEach((freq) => {
+          const osc = ctx.createOscillator();
+          const noteGain = ctx.createGain();
+          const filter = ctx.createBiquadFilter();
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now);
+          osc.detune.setValueAtTime((Math.random() - 0.5) * 10, now);
+
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(640, now);
+
+          noteGain.gain.setValueAtTime(0.0001, now);
+          noteGain.gain.exponentialRampToValueAtTime(0.055, now + 0.8);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 3.85);
+
+          osc.connect(filter);
+          filter.connect(noteGain);
+          noteGain.connect(destination);
+
+          osc.start(now);
+          osc.stop(now + 4.0);
+          activeAudioNodes.push(osc, noteGain, filter);
+        });
+      };
+
+      triggerChord();
+      soundTimer = setInterval(triggerChord, 4000);
+    }
+
+    function playSingingBowl432Synthesis(ctx, destination) {
+      const strikeBowl = () => {
+        const now = ctx.currentTime;
+        const harmonics = [
+          { freq: 432, amp: 0.08, dur: 6.5 },
+          { freq: 434.5, amp: 0.045, dur: 6.5 },
+          { freq: 864, amp: 0.028, dur: 4.8 },
+          { freq: 1296, amp: 0.012, dur: 3.5 },
+        ];
+
+        harmonics.forEach((h) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(h.freq, now);
+
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(h.amp, now + 0.35);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + h.dur);
+
+          osc.connect(gain);
+          gain.connect(destination);
+          osc.start(now);
+          osc.stop(now + h.dur + 0.1);
+          activeAudioNodes.push(osc, gain);
+        });
+      };
+
+      strikeBowl();
+      soundTimer = setInterval(strikeBowl, 6200);
+    }
+
+    function updateAudioVisualizer() {
+      if (!isAudioPlaying || !analyserNode) {
+        for (let i = 0; i < 5; i++) {
+          const bar = document.getElementById(`eq-bar-${i}`);
+          if (bar) {
+            bar.style.height = `${[4, 8, 5, 9, 4][i]}px`;
+            bar.classList.remove('bg-[#F59E0B]');
+            bar.classList.add('bg-slate-500');
+          }
+        }
+        return;
+      }
+
+      const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
+      analyserNode.getByteFrequencyData(dataArray);
+
+      const indices = [1, 3, 6, 10, 15];
+      indices.forEach((binIdx, i) => {
+        const bar = document.getElementById(`eq-bar-${i}`);
+        if (bar) {
+          const val = dataArray[binIdx] || 0;
+          const h = Math.max(4, Math.min(15, 4 + (val / 255) * 14));
+          bar.style.height = `${h.toFixed(1)}px`;
+          bar.classList.remove('bg-slate-500');
+          bar.classList.add('bg-[#F59E0B]');
+        }
+      });
+
+      visualizerRaf = requestAnimationFrame(updateAudioVisualizer);
+    }
+
+    function startAmbientEngine() {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!audioCtx) {
+        audioCtx = new AudioContextClass();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      stopAmbientNodes();
+
+      masterGain = audioCtx.createGain();
+      masterGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      masterGain.gain.exponentialRampToValueAtTime(0.8, audioCtx.currentTime + 1.0);
+
+      analyserNode = audioCtx.createAnalyser();
+      analyserNode.fftSize = 64;
+      analyserNode.smoothingTimeConstant = 0.82;
+
+      masterGain.connect(analyserNode);
+      analyserNode.connect(audioCtx.destination);
+
+      if (audioMode === 'rain') {
+        playNightRainSynthesis(audioCtx, masterGain);
+      } else if (audioMode === 'lofi') {
+        playWarmLofiSynthesis(audioCtx, masterGain);
+      } else {
+        playSingingBowl432Synthesis(audioCtx, masterGain);
+      }
+
+      if (visualizerRaf) cancelAnimationFrame(visualizerRaf);
+      updateAudioVisualizer();
+    }
+
+    function toggleAmbientAudio() {
+      isAudioPlaying = !isAudioPlaying;
+      const statusText = document.getElementById('audio-status-text');
+      const switcher = document.getElementById('audio-mode-switcher');
+
+      if (isAudioPlaying) {
+        statusText.textContent = 'Đang phát';
+        statusText.classList.add('text-[#F59E0B]');
+        switcher.classList.remove('hidden');
+        switcher.classList.add('flex');
+        startAmbientEngine();
+      } else {
+        statusText.textContent = 'Không gian âm';
+        statusText.classList.remove('text-[#F59E0B]');
+        switcher.classList.add('hidden');
+        switcher.classList.remove('flex');
+        stopAmbientNodes();
+        if (visualizerRaf) cancelAnimationFrame(visualizerRaf);
+        updateAudioVisualizer();
+      }
+    }
+
+    function switchAudioMode(mode) {
+      audioMode = mode;
+      ['rain', 'lofi', 'bowl'].forEach((m) => {
+        const btn = document.getElementById(`mode-${m}-btn`);
+        if (btn) {
+          btn.className =
+            m === mode
+              ? 'rounded-full bg-[#F59E0B]/20 px-2.5 py-1 text-[11px] font-semibold text-[#F59E0B] transition'
+              : 'rounded-full px-2.5 py-1 text-[11px] font-medium text-slate-400 hover:text-slate-200 transition';
+        }
+      });
+      if (isAudioPlaying) {
+        startAmbientEngine();
+      }
+    }
+
+    // =========================================================================
+    // 4. DỮ LIỆU GIỌNG VĂN (SVG ĐỘNG) & 4 HÀNH TRÌNH KHÁM PHÁ
+    // =========================================================================
+    const AI_TONES = [
+      {
+        id: 'warm',
+        label: 'Ấm áp',
+        description: 'Thấu cảm, nâng đỡ như một người bạn tri kỷ lắng nghe không phán xét.',
+        svgIcon: `<svg class="h-5 w-5 text-[#F59E0B] tone-icon-animated" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>`,
+      },
+      {
+        id: 'direct',
+        label: 'Thẳng thắn',
+        description: 'Sắc bén, đi thẳng vào trọng tâm và gọi tên những điều bạn đang né tránh.',
+        svgIcon: `<svg class="h-5 w-5 text-[#38BDF8] tone-icon-animated" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+        </svg>`,
+      },
+      {
+        id: 'philosophical',
+        label: 'Triết lý',
+        description: 'Sâu lắng, chiêm nghiệm về bản chất tồn tại, giá trị và dòng chảy thời gian.',
+        svgIcon: `<svg class="h-5 w-5 text-[#A78BFA] tone-icon-animated" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 3a9 9 0 0 0 0 18"/>
+          <circle cx="12" cy="12" r="2.5"/>
+        </svg>`,
+      },
+    ];
+
+    const REFLECTION_TRACKS = [
+      {
+        id: 'deep-3',
+        title: '3 câu hỏi chạm sâu',
+        subtitle: 'Lắng lại 3 phút để nhìn rõ hiện tại và bước tiếp theo',
+        duration: '3 phút',
+        questions: [
+          'Nếu phải gói gọn quãng thời gian vừa qua bằng một khoảnh khắc khiến bạn chững lại lâu nhất, đó là khoảnh khắc nào?',
+          'Ngay lúc này, khi tạm gác lại mọi vai trò và kỳ vọng của người khác, cảm xúc nào đang chiếm nhiều không gian nhất trong lòng bạn?',
+          'Đâu là một hành động nhỏ nhất — chỉ mất dưới 15 phút — bạn có thể làm trong 24 giờ tới để thành thật với chính mình hơn?',
+        ],
+      },
+      {
+        id: 'career-compass',
+        title: 'La bàn sự nghiệp',
+        subtitle: 'Định vị giá trị cốt lõi giữa áp lực thành tựu và đam mê thực sự',
+        duration: '7 phút',
+        questions: [
+          'Trong công việc hiện tại, khoảnh khắc nào khiến bạn quên mất khái niệm thời gian, và khoảnh khắc nào rút cạn năng lượng của bạn nhanh nhất?',
+          'Nếu thu nhập và ánh nhìn ngưỡng mộ từ xã hội không còn là thước đo, bạn vẫn sẽ chọn theo đuổi điều gì?',
+          'Nỗi sợ lớn nhất đang giữ chân bạn ở vùng an toàn hiện tại thực chất mang hình hài gì?',
+          'Bạn đang đánh đổi điều gì quý giá nhất để duy trì quỹ đạo nghề nghiệp hiện tại?',
+          'Nếu phiên bản của bạn 5 năm sau nhìn lại ngày hôm nay, họ sẽ tiếc nuối vì bạn đã không dám thử điều gì?',
+          'Kỹ năng hoặc thế mạnh tự nhiên nào của bạn đang bị bỏ quên vì bạn mải chạy theo tiêu chuẩn của số đông?',
+          'Một bước thử nghiệm nhỏ không rủi ro nào bạn có thể bắt đầu ngay tuần này để kiểm chứng hướng đi mình khao khát?',
+        ],
+      },
+      {
+        id: 'inner-decode',
+        title: 'Giải mã nội tâm',
+        subtitle: 'Gọi tên những nút thắt cảm xúc ẩn dưới bề mặt bận rộn',
+        duration: '7 phút',
+        questions: [
+          'Điều gì gần đây khiến bạn phản ứng mạnh hơn mức bình thường — dù bề ngoài bạn cố tỏ ra ổn?',
+          'Khi ở một mình trong im lặng tuyệt đối, suy nghĩ nào thường tự động quay trở lại đầu tiên?',
+          'Bạn đang cố gắng chứng minh điều gì, và cho ai thấy, thông qua sự gồng mình hiện tại?',
+          'Có ranh giới cá nhân nào bạn đã để người khác bước qua chỉ vì sợ làm mất lòng họ?',
+          'Nếu cảm xúc nặng nề nhất lúc này có thể cất tiếng nói, nó đang muốn bảo vệ bạn khỏi điều gì?',
+          'Bạn thường tự trách mình vì điều gì mà nếu là một người bạn thân mắc phải, bạn sẽ lập tức bao dung?',
+          'Hôm nay bạn cần cho phép bản thân buông xuống kỳ vọng nào để được thở nhẹ hơn?',
+        ],
+      },
+      {
+        id: 'crossroads',
+        title: 'Gỡ rối ngã rẽ',
+        subtitle: 'Làm sáng tỏ quyết định quan trọng khi đứng giữa hai lựa chọn',
+        duration: '7 phút',
+        questions: [
+          'Hãy gọi tên hai lựa chọn đang giằng co trong tâm trí bạn — điều gì khiến cả hai đều khó buông bỏ?',
+          'Khi nghĩ đến việc chọn phương án A, cơ thể và cảm xúc của bạn phản ứng ra sao so với khi nghĩ đến phương án B?',
+          'Đằng sau sự do dự này, bạn đang sợ mất đi điều gì nhiều hơn là mong muốn đạt được điều gì?',
+          'Nếu buộc phải đưa ra quyết định ngay trong 60 giây tới mà không được giải thích với ai, trực giác của bạn nghiêng về phía nào?',
+          'Giả sử lựa chọn bạn chọn dẫn đến một kết quả không như ý, khả năng phục hồi của bạn sẽ giúp bạn xoay xở ra sao?',
+          'Ai hoặc điều gì đang vô hình chi phối cán cân quyết định của bạn nhiều hơn tiếng nói bên trong bạn?',
+          'Thông tin duy nhất nào bạn còn thiếu — hoặc hành động kiểm chứng nào bạn cần làm — trước khi khép lại sự phân vân này?',
+        ],
+      },
+    ];
+
+    const appState = {
+      selectedTone: 'warm',
+      selectedTrack: REFLECTION_TRACKS[0],
+      questions: [...REFLECTION_TRACKS[0].questions],
+      adaptiveFlags: [false, false, false],
+      currentIndex: 0,
+      history: [],
+      isAdapting: false,
+      reflection: '',
+      insightCard: {
+        keyword: 'Tĩnh Tại & Chuyển Mình',
+        blindSpot: 'Bạn đang chờ cảm giác chắc chắn tuyệt đối mới dám bước đi bước đầu tiên.',
+        microChallenge: 'Dành 15 phút tối nay tắt toàn bộ thông báo và viết ra 1 điều bạn ngừng trì hoãn.',
+        emotionLabel: 'Lắng đọng',
+        emotionScore: 7,
+      },
+      cardThemeId: 'deep-night',
+      capsuleDelayMonths: 6,
+      lastSealedCapsuleId: null,
+      authEmail: null,
+      selectedSplineIndex: null,
+    };
+
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'rounded-full border border-[#F59E0B]/45 bg-[#161B26]/95 px-4 py-2 text-xs font-medium text-[#F8FAFC] shadow-2xl backdrop-blur-xl animate-linear-in';
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 2800);
+    }
+
+    function switchScreen(screenName) {
+      const screens = ['landing', 'focus', 'breathing', 'result', 'journey'];
+      screens.forEach((name) => {
+        const el = document.getElementById(`screen-${name}`);
+        if (name === screenName) {
+          el.classList.remove('hidden');
+          if (name === 'result' || name === 'journey') {
+            el.classList.remove('flex');
+            el.classList.add('block');
+          } else {
+            el.classList.remove('block');
+            el.classList.add('flex');
+          }
+        } else {
+          el.classList.add('hidden');
+          el.classList.remove('flex', 'block');
+        }
+      });
+
+      if (screenName === 'journey') {
+        renderJourneyScreen();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderLandingSelectors() {
+      const toneGrid = document.getElementById('tone-selector-grid');
+      toneGrid.innerHTML = AI_TONES.map((tone) => {
+        const active = appState.selectedTone === tone.id;
+        return `
+          <button
+            type="button"
+            onclick="selectTone('${tone.id}')"
+            class="spotlight-card tilt-3d rounded-2xl border p-4 text-left ${
+              active
+                ? 'border-[#F59E0B] shadow-[0_0_28px_-8px_rgba(245,158,11,0.45)]'
+                : 'border-slate-800/90 hover:border-slate-700'
+            }"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B1120]/80 border border-slate-800">
+                  ${tone.svgIcon}
+                </div>
+                <span class="text-sm font-bold ${active ? 'text-[#F59E0B]' : 'text-[#F8FAFC]'}">${tone.label}</span>
+              </div>
+              ${active ? '<span class="h-2 w-2 rounded-full bg-[#F59E0B] shadow-[0_0_8px_#F59E0B]"></span>' : ''}
+            </div>
+            <p class="mt-2.5 text-xs leading-relaxed text-slate-400">${tone.description}</p>
+          </button>
+        `;
+      }).join('');
+
+      const trackGrid = document.getElementById('track-selector-grid');
+      trackGrid.innerHTML = REFLECTION_TRACKS.map((track) => {
+        const active = appState.selectedTrack.id === track.id;
+        return `
+          <button
+            type="button"
+            onclick="selectTrack('${track.id}')"
+            class="spotlight-card tilt-3d rounded-2xl border p-4 text-left ${
+              active
+                ? 'border-[#F59E0B] shadow-[0_0_28px_-8px_rgba(245,158,11,0.4)]'
+                : 'border-slate-800/90 hover:border-slate-700'
+            }"
+          >
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-sm font-bold ${active ? 'text-[#F59E0B]' : 'text-[#F8FAFC]'}">${track.title}</span>
+              <span class="rounded-full border border-slate-700/80 bg-[#0B1120]/80 px-2.5 py-0.5 text-[11px] font-medium text-slate-300">
+                ${track.questions.length} câu • ${track.duration}
+              </span>
+            </div>
+            <p class="mt-2 text-xs leading-relaxed text-slate-400">${track.subtitle}</p>
+          </button>
+        `;
+      }).join('');
+
+      document.getElementById('start-btn-label').textContent =
+        `Bắt đầu chế độ "${appState.selectedTrack.title}" (${appState.selectedTrack.duration})`;
+
+      updateJourneyBadgeCount();
+    }
+
+    function selectTone(toneId) {
+      appState.selectedTone = toneId;
+      renderLandingSelectors();
+    }
+
+    function selectTrack(trackId) {
+      const found = REFLECTION_TRACKS.find((t) => t.id === trackId);
+      if (found) {
+        appState.selectedTrack = found;
+        renderLandingSelectors();
+      }
+    }
+
+    // =========================================================================
+    // 5. KIỂM DUYỆT AN TOÀN & AI "HỎI XOÁY ĐÁP XOAY" (ADAPTIVE FOLLOW-UP)
+    // =========================================================================
+    const UNSAFE_PATTERNS = [
+      /tự\s*tử/i,
+      /tự\s*hại/i,
+      /kết\s*liễu\s*cuộc\s*đời/i,
+      /giết\s*người/i,
+      /đánh\s*bom/i,
+      /chế\s*tạo\s*vũ\s*khí/i,
+      /ma\s*túy/i,
+      /buôn\s*lậu/i,
+      /lừa\s*đảo\s*chiếm\s*đoạt/i,
+    ];
+
+    function checkSafetyViolation(text) {
+      const normalized = text.normalize('NFC');
+      for (const pattern of UNSAFE_PATTERNS) {
+        if (pattern.test(normalized)) {
+          return {
+            safe: false,
+            reason:
+              'Nội dung bạn nhập có chứa yếu tố liên quan đến tự hại, bạo lực hoặc hành vi vi phạm pháp luật. AI for you từ chối xử lý nội dung này. Vui lòng nhập lại chia sẻ an toàn để tiếp tục.',
+          };
+        }
+      }
+      return { safe: true };
+    }
+
+    async function callReflectionAI(mode, history, defaultNextQuestion = '') {
+      await new Promise((r) => setTimeout(r, 450));
+      return generateContextualFallback(mode, history);
+    }
+
+    function generateContextualFallback(mode, history) {
+      const a1 = history[0]?.answer || '';
+      const a2 = history[history.length - 1]?.answer || '';
+      const combined = `${a1} ${a2}`.toLowerCase();
+
+      const cleanSnippet = a2.replace(/[.!?]+$/, '').trim();
+      const focusPhrase =
+        cleanSnippet.length > 52 ? `${cleanSnippet.slice(0, 49).trim()}...` : cleanSnippet;
+
+      const hasCareerConflict = /công việc|nghề|chọn|ngã rẽ|rời đi|ổn định|đam mê|lương/i.test(combined);
+      const hasFatigue = /mệt|áp lực|quá tải|kiệt sức|lo âu|hoang mang|sợ|căng thẳng/i.test(combined);
+
+      if (mode === 'adaptive_question') {
+        if (appState.selectedTone === 'direct') {
+          return {
+            nextQuestion: `Bạn vừa nhắc tới "${focusPhrase}". Nếu gạt sang một bên mọi lý do an toàn, điều gì thực sự đang ngăn bạn bước qua ranh giới đó ngay hôm nay?`,
+            detectedEmotion: 'Trăn trở',
+          };
+        }
+        if (appState.selectedTone === 'philosophical') {
+          return {
+            nextQuestion: `Ẩn sau trải nghiệm "${focusPhrase}", đâu là giá trị cốt lõi mà tâm hồn bạn đang muốn giữ gìn giữa những biến động này?`,
+            detectedEmotion: 'Chiêm nghiệm',
+          };
+        }
+        return {
+          nextQuestion: `Khi lắng lại với cảm giác "${focusPhrase}", đâu là một hành động nhỏ dịu dàng nhất bạn có thể dành cho chính mình trong 24 giờ tới?`,
+          detectedEmotion: 'Lắng đọng',
+        };
+      }
+
+      let reflectionText = '';
+      if (appState.selectedTone === 'direct') {
+        reflectionText = `Qua những gì bạn chia sẻ về "${focusPhrase}", có thể thấy bạn không thiếu năng lực nhìn nhận vấn đề — nút thắt nằm ở chỗ bạn đang cố giữ sự an toàn cho quá nhiều kỳ vọng cùng lúc.\n\nSự sáng rõ không đến từ việc suy tính thêm một trăm kịch bản nữa, mà đến từ khoảnh khắc bạn dám chọn một bước đi nhỏ nhất và chịu trách nhiệm trọn vẹn với nó trong 24 giờ tới.`;
+      } else if (appState.selectedTone === 'philosophical') {
+        reflectionText = `Những dòng bạn viết về "${focusPhrase}" giống như một khoảng lặng cần thiết giữa dòng chảy vội vã. Khi tâm trí bắt đầu đặt câu hỏi về ý nghĩa thực sự của điều mình đang theo đuổi, đó là dấu hiệu của sự tỉnh thức nội tâm.\n\nMỗi ngã rẽ đều chứa đựng phần bất định, nhưng chính cách bạn hiện diện trọn vẹn với bước chân gần nhất hôm nay sẽ tự khắc mở lối cho ngày mai.`;
+      } else {
+        reflectionText = `Cảm ơn bạn đã thành thật mở lòng về "${focusPhrase}". Sự chững lại lúc này không phải là dấu hiệu của sự yếu đuối hay bế tắc, mà là cách tâm trí nhắc nhở bạn cần được lắng nghe và nâng đỡ đúng mực.\n\nBạn không cần phải giải quyết toàn bộ bức tranh lớn ngay trong hôm nay. Chỉ cần một hành động nhỏ xuất phát từ sự tử tế với chính mình cũng đủ mở ra một nhịp thở nhẹ nhõm hơn.`;
+      }
+
+      return {
+        reflection: reflectionText,
+        keyword: hasCareerConflict
+          ? 'Định Vị & Can Đảm'
+          : hasFatigue
+          ? 'Lắng Dịu & Tái Tạo'
+          : 'Tĩnh Tại & Chuyển Mình',
+        blindSpot: hasCareerConflict
+          ? 'Bạn đang chờ cảm giác chắc chắn 100% trước khi dám thử nghiệm bước đi đầu tiên.'
+          : 'Bạn đang gánh quá nhiều kỳ vọng bên ngoài mà quên hỏi bản thân thực sự cần gì.',
+        microChallenge:
+          'Dành 15 phút tối nay tắt thông báo điện thoại và viết ra 1 việc duy nhất bạn chọn ưu tiên ngày mai.',
+        emotionLabel: hasFatigue ? 'Sâu lắng' : 'Tỉnh thức',
+        emotionScore: hasFatigue ? 6 : 8,
+      };
+    }
+
+    // =========================================================================
+    // 6. FOCUS UI ("KHÔNG GIAN TĨNH") & MIRROR AURA CẢM XÚC
+    // =========================================================================
+    function startReflectionSession() {
+      appState.questions = [...appState.selectedTrack.questions];
+      appState.adaptiveFlags = new Array(appState.questions.length).fill(false);
+      appState.currentIndex = 0;
+      appState.history = [];
+      appState.isAdapting = false;
+
+      switchScreen('focus');
+      renderFocusQuestion();
+    }
+
+    function updateMirrorAura(text) {
+      const aura = document.getElementById('mirror-aura-glow');
+      const hint = document.getElementById('aura-emotion-hint');
+      if (!aura || !hint) return;
+
+      const lower = text.toLowerCase();
+      if (!text.trim()) {
+        aura.style.background =
+          'radial-gradient(circle, rgba(245,158,11,0.55) 0%, rgba(99,102,241,0.25) 55%, transparent 75%)';
+        aura.style.opacity = '0.25';
+        hint.textContent = 'Không gian tĩnh tại';
+        return;
+      }
+
+      aura.style.opacity = '0.45';
+      if (/mệt|buồn|áp lực|lo|sợ|hoang mang|căng thẳng|rối/i.test(lower)) {
+        aura.style.background =
+          'radial-gradient(circle, rgba(99,102,241,0.65) 0%, rgba(56,189,248,0.3) 55%, transparent 75%)';
+        hint.textContent = 'Gương đang lắng nghe chiều sâu cảm xúc...';
+      } else if (/hy vọng|vui|bình yên|rõ ràng|quyết tâm|thử|mới|tự do/i.test(lower)) {
+        aura.style.background =
+          'radial-gradient(circle, rgba(20,184,166,0.65) 0%, rgba(245,158,11,0.35) 55%, transparent 75%)';
+        hint.textContent = 'Năng lượng chuyển hóa đang dần sáng rõ...';
+      } else {
+        aura.style.background =
+          'radial-gradient(circle, rgba(245,158,11,0.65) 0%, rgba(251,191,36,0.3) 55%, transparent 75%)';
+        hint.textContent = 'Đang phản chiếu dòng suy nghĩ của bạn...';
+      }
+    }
+
+    function renderFocusQuestion() {
+      const idx = appState.currentIndex;
+      const total = appState.questions.length;
+
+      document.getElementById('focus-progress-text').textContent = `Câu ${idx + 1}/${total}`;
+
+      const segBar = document.getElementById('focus-segmented-bar');
+      segBar.style.gridTemplateColumns = `repeat(${total}, minmax(0, 1fr))`;
+      segBar.innerHTML = Array.from({ length: total }, (_, i) => {
+        const active = i <= idx;
+        return `<div class="h-1.5 rounded-full transition-all duration-500 ${
+          active ? 'bg-[#F59E0B] shadow-[0_0_10px_rgba(245,158,11,0.6)]' : 'bg-slate-800'
+        }"></div>`;
+      }).join('');
+
+      const adaptiveLoading = document.getElementById('adaptive-loading-badge');
+      const adaptiveActive = document.getElementById('adaptive-active-badge');
+      const inputEl = document.getElementById('focus-answer-input');
+      const questionEl = document.getElementById('focus-question-text');
+      const nextBtn = document.getElementById('focus-next-btn');
+      const nextLabel = document.getElementById('focus-next-label');
+
+      document.getElementById('safety-warning-box').classList.add('hidden');
+      document.getElementById('safety-warning-box').classList.remove('flex');
+
+      const card = document.getElementById('focus-card-container');
+      card.classList.remove('animate-linear-in');
+      void card.offsetWidth;
+      card.classList.add('animate-linear-in');
+
+      if (appState.isAdapting) {
+        adaptiveLoading.classList.remove('hidden');
+        adaptiveLoading.classList.add('inline-flex');
+        adaptiveActive.classList.add('hidden');
+        questionEl.textContent = 'Đang lắng nghe nhịp cảm xúc và điều chỉnh câu hỏi tiếp theo...';
+        inputEl.disabled = true;
+        nextBtn.disabled = true;
+      } else {
+        adaptiveLoading.classList.add('hidden');
+        adaptiveLoading.classList.remove('inline-flex');
+
+        if (appState.adaptiveFlags[idx]) {
+          adaptiveActive.classList.remove('hidden');
+          adaptiveActive.classList.add('inline-flex');
+        } else {
+          adaptiveActive.classList.add('hidden');
+        }
+
+        questionEl.textContent = appState.questions[idx];
+        inputEl.disabled = false;
+        inputEl.value = '';
+        document.getElementById('word-counter-label').textContent = '0 từ • Gõ tự do, không giới hạn khuôn mẫu';
+        updateMirrorAura('');
+        nextBtn.disabled = true;
+        nextLabel.textContent = idx + 1 === total ? 'Hoàn tất & Soi chiếu' : 'Tiếp tục';
+        setTimeout(() => inputEl.focus(), 60);
+      }
+    }
+
+    function handleAnswerInput() {
+      const raw = document.getElementById('focus-answer-input').value;
+      const trimmed = raw.trim();
+      const words = trimmed ? trimmed.split(/\s+/).length : 0;
+      document.getElementById('word-counter-label').textContent = `${words} từ • Gõ tự do, không giới hạn khuôn mẫu`;
+      document.getElementById('focus-next-btn').disabled = trimmed.length < 2 || appState.isAdapting;
+      updateMirrorAura(trimmed);
+    }
+
+    function handleAnswerKeydown(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        const btn = document.getElementById('focus-next-btn');
+        if (!btn.disabled) submitCurrentAnswer();
+      }
+    }
+
+    let breathingInterval = null;
+    function startBreathingCycle() {
+      const phaseEl = document.getElementById('breathing-phase-text');
+      const phases = [
+        { text: 'Hít vào chậm rãi...', delay: 0 },
+        { text: 'Giữ nhịp tĩnh lặng...', delay: 3000 },
+        { text: 'Thở ra nhẹ nhàng...', delay: 5000 },
+      ];
+      let timeouts = [];
+      const runOnce = () => {
+        phases.forEach((p) => {
+          timeouts.push(
+            setTimeout(() => {
+              phaseEl.textContent = p.text;
+            }, p.delay)
+          );
+        });
+      };
+      runOnce();
+      breathingInterval = setInterval(runOnce, 8500);
+      return () => {
+        clearInterval(breathingInterval);
+        timeouts.forEach(clearTimeout);
+      };
+    }
+
+    async function submitCurrentAnswer() {
+      const inputEl = document.getElementById('focus-answer-input');
+      const answerText = inputEl.value.trim();
+      if (answerText.length < 2 || appState.isAdapting) return;
+
+      const safety = checkSafetyViolation(answerText);
+      if (!safety.safe) {
+        const warnBox = document.getElementById('safety-warning-box');
+        document.getElementById('safety-warning-text').textContent = safety.reason;
+        warnBox.classList.remove('hidden');
+        warnBox.classList.add('flex');
+        return;
+      }
+
+      const idx = appState.currentIndex;
+      const updatedHistory = [
+        ...appState.history,
+        { question: appState.questions[idx], answer: answerText },
+      ];
+      appState.history = updatedHistory;
+      syncCounselorContextBadge();
+
+      const nextIdx = idx + 1;
+
+      if (nextIdx >= appState.questions.length) {
+        switchScreen('breathing');
+        const stopBreathing = startBreathingCycle();
+
+        const [aiResult] = await Promise.all([
+          callReflectionAI('final_synthesis', updatedHistory),
+          new Promise((r) => setTimeout(r, 3200)),
+        ]);
+
+        stopBreathing();
+        appState.reflection = aiResult.reflection;
+        appState.insightCard = {
+          keyword: aiResult.keyword,
+          blindSpot: aiResult.blindSpot,
+          microChallenge: aiResult.microChallenge,
+          emotionLabel: aiResult.emotionLabel || 'Tỉnh thức',
+          emotionScore: aiResult.emotionScore || 7,
+        };
+
+        renderResultScreen();
+        switchScreen('result');
+        return;
+      }
+
+      if (nextIdx === 2 || nextIdx === 3) {
+        appState.currentIndex = nextIdx;
+        appState.isAdapting = true;
+        renderFocusQuestion();
+
+        const adapted = await callReflectionAI(
+          'adaptive_question',
+          updatedHistory,
+          appState.questions[nextIdx]
+        );
+
+        appState.isAdapting = false;
+        if (adapted && adapted.nextQuestion) {
+          appState.questions[nextIdx] = adapted.nextQuestion;
+          appState.adaptiveFlags[nextIdx] = true;
+        }
+        renderFocusQuestion();
+        return;
+      }
+
+      appState.currentIndex = nextIdx;
+      renderFocusQuestion();
+    }
+
+    // =========================================================================
+    // 7. THẺ CHÂN DUNG CÁ NHÂN HTML5 CANVAS 1080x1920px (4 CHỦ ĐỀ MÀU SẮC)
+    // =========================================================================
+    const CARD_THEMES = {
+      'deep-night': {
+        name: 'Đêm Sâu',
+        bgStart: '#0B1120',
+        bgEnd: '#161B26',
+        surface: 'rgba(22, 27, 38, 0.88)',
+        accent: '#F59E0B',
+        secondaryGlow: 'rgba(245, 158, 11, 0.24)',
+        textPrimary: '#F8FAFC',
+        textSecondary: '#94A3B8',
+        border: 'rgba(245, 158, 11, 0.42)',
+      },
+      tranquil: {
+        name: 'Tĩnh Lặng',
+        bgStart: '#08141E',
+        bgEnd: '#12293A',
+        surface: 'rgba(14, 34, 48, 0.86)',
+        accent: '#38BDF8',
+        secondaryGlow: 'rgba(56, 189, 248, 0.24)',
+        textPrimary: '#F8FAFC',
+        textSecondary: '#BAE6FD',
+        border: 'rgba(56, 189, 248, 0.42)',
+      },
+      dawn: {
+        name: 'Bình Minh',
+        bgStart: '#1D1311',
+        bgEnd: '#321F1A',
+        surface: 'rgba(46, 29, 24, 0.88)',
+        accent: '#FBBF24',
+        secondaryGlow: 'rgba(251, 191, 36, 0.25)',
+        textPrimary: '#FFFBEB',
+        textSecondary: '#FDE68A',
+        border: 'rgba(251, 191, 36, 0.45)',
+      },
+      aurora: {
+        name: 'Cực Quang',
+        bgStart: '#0D1026',
+        bgEnd: '#112A2E',
+        surface: 'rgba(18, 28, 46, 0.86)',
+        accent: '#2DD4BF',
+        secondaryGlow: 'rgba(99, 102, 241, 0.28)',
+        textPrimary: '#F8FAFC',
+        textSecondary: '#A5F3FC',
+        border: 'rgba(45, 212, 191, 0.45)',
+      },
+    };
+
+    function renderResultScreen() {
+      const toneObj = AI_TONES.find((t) => t.id === appState.selectedTone);
+      document.getElementById('result-tone-badge').textContent =
+        `Góc nhìn phản chiếu • Giọng văn ${toneObj ? toneObj.label : 'Ấm áp'}`;
+
+      const bodyEl = document.getElementById('result-reflection-body');
+      bodyEl.innerHTML = appState.reflection
+        .split(/\n\n+/)
+        .map((p) => `<p>${escapeHtml(p)}</p>`)
+        .join('');
+
+      document.getElementById('result-blindspot-text').textContent = appState.insightCard.blindSpot;
+      document.getElementById('result-challenge-text').textContent = appState.insightCard.microChallenge;
+
+      const saveBtn = document.getElementById('save-journey-btn');
+      saveBtn.disabled = false;
+      saveBtn.querySelector('span').textContent = 'Lưu vào Hành trình';
+
+      drawInsightCardCanvas();
+    }
+
+    function selectCardTheme(themeId) {
+      appState.cardThemeId = themeId;
+      ['deep-night', 'tranquil', 'dawn', 'aurora'].forEach((id) => {
+        const btn = document.getElementById(`card-theme-${id}`);
+        if (btn) {
+          btn.className =
+            id === themeId
+              ? 'rounded-full bg-[#F59E0B] px-3 py-1.5 text-xs font-bold text-[#0B1120] transition'
+              : 'rounded-full px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white transition';
+        }
+      });
+      drawInsightCardCanvas();
+    }
+
+    function wrapVietnameseText(ctx, text, maxWidth) {
+      const words = text.trim().split(/\s+/);
+      const lines = [];
+      let currentLine = '';
+
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine) lines.push(currentLine);
+      return lines;
+    }
+
+    function drawRoundedRectPath(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    async function drawInsightCardCanvas() {
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+
+      const canvas = document.getElementById('insight-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const theme = CARD_THEMES[appState.cardThemeId] || CARD_THEMES['deep-night'];
+      const data = appState.insightCard;
+
+      const W = 1080;
+      const H = 1920;
+      canvas.width = W;
+      canvas.height = H;
+
+      const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+      bgGrad.addColorStop(0, theme.bgStart);
+      bgGrad.addColorStop(1, theme.bgEnd);
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      const glow = ctx.createRadialGradient(W * 0.5, H * 0.25, 30, W * 0.5, H * 0.25, 560);
+      glow.addColorStop(0, theme.secondaryGlow);
+      glow.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.fillStyle = theme.accent;
+      for (let i = 0; i < 24; i++) {
+        const sx = ((i * 197) % (W - 180)) + 90;
+        const sy = ((i * 313) % (H - 220)) + 110;
+        ctx.globalAlpha = 0.22;
+        ctx.beginPath();
+        ctx.arc(sx, sy, (i % 3) + 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      ctx.strokeStyle = theme.border;
+      ctx.lineWidth = 3;
+      drawRoundedRectPath(ctx, 64, 64, W - 128, H - 128, 48);
+      ctx.stroke();
+
+      const todayStr = new Date().toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+      ctx.textAlign = 'center';
+      ctx.fillStyle = theme.accent;
+      ctx.font = '700 30px "Be Vietnam Pro", sans-serif';
+      ctx.fillText('THẺ CHÂN DUNG CÁ NHÂN', W / 2, 175);
+
+      ctx.fillStyle = theme.textSecondary;
+      ctx.font = '400 26px "Be Vietnam Pro", sans-serif';
+      ctx.fillText(`${todayStr}  •  ${appState.selectedTrack.title}`, W / 2, 224);
+
+      ctx.fillStyle = theme.textSecondary;
+      ctx.font = '600 26px "Be Vietnam Pro", sans-serif';
+      ctx.fillText('TỪ KHÓA ĐẠI DIỆN HIỆN TẠI', W / 2, 385);
+
+      ctx.fillStyle = theme.accent;
+      ctx.font = '700 72px "Be Vietnam Pro", sans-serif';
+      const keywordLines = wrapVietnameseText(ctx, data.keyword, W - 200);
+      keywordLines.slice(0, 2).forEach((line, idx) => {
+        ctx.fillText(line, W / 2, 482 + idx * 88);
+      });
+
+      ctx.strokeStyle = theme.border;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(230, 628);
+      ctx.lineTo(W - 230, 628);
+      ctx.stroke();
+
+      drawRoundedRectPath(ctx, 110, 695, W - 220, 415, 36);
+      ctx.fillStyle = theme.surface;
+      ctx.fill();
+      ctx.strokeStyle = theme.border;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = theme.accent;
+      ctx.font = '700 28px "Be Vietnam Pro", sans-serif';
+      ctx.fillText('01 • MỘT ĐIỂM MÙ BẠN ĐANG BỎ QUA', 165, 775);
+
+      ctx.fillStyle = theme.textPrimary;
+      ctx.font = '400 40px "Be Vietnam Pro", sans-serif';
+      const blindSpotLines = wrapVietnameseText(ctx, data.blindSpot, W - 330);
+      blindSpotLines.slice(0, 4).forEach((line, idx) => {
+        ctx.fillText(line, 165, 852 + idx * 58);
+      });
+
+      drawRoundedRectPath(ctx, 110, 1165, W - 220, 415, 36);
+      ctx.fillStyle = theme.surface;
+      ctx.fill();
+      ctx.strokeStyle = theme.border;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = theme.accent;
+      ctx.font = '700 28px "Be Vietnam Pro", sans-serif';
+      ctx.fillText('02 • THỬ THÁCH NHỎ TRONG 24 GIỜ TỚI', 165, 1245);
+
+      ctx.fillStyle = theme.textPrimary;
+      ctx.font = '400 40px "Be Vietnam Pro", sans-serif';
+      const challengeLines = wrapVietnameseText(ctx, data.microChallenge, W - 330);
+      challengeLines.slice(0, 4).forEach((line, idx) => {
+        ctx.fillText(line, 165, 1322 + idx * 58);
+      });
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = theme.textSecondary;
+      ctx.font = '500 30px "Be Vietnam Pro", sans-serif';
+      ctx.fillText('AI for you — Chiếc gương phản chiếu của bạn', W / 2, 1778);
+    }
+
+    function downloadInsightCardPNG() {
+      const canvas = document.getElementById('insight-canvas');
+      if (!canvas) return;
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `AI-for-you-chan-dung-${Date.now()}.png`;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+        showToast('Đã tải xuống Thẻ Chân Dung Cá Nhân PNG (1080×1920px)');
+      }, 'image/png');
+    }
+
+    // =========================================================================
+    // 8. MÃ HÓA AES-256-GCM (WEB CRYPTO API), TIME CAPSULE & HÀNH TRÌNH CỦA TÔI
+    // =========================================================================
+    const STORAGE_KEYS = {
+      SESSIONS: 'aiforyou_encrypted_sessions_v2',
+      CAPSULES: 'aiforyou_encrypted_capsules_v2',
+      AUTH_EMAIL: 'aiforyou_auth_email_v2',
+      CRYPTO_KEY: 'aiforyou_aes_key_jwk_v2',
+    };
+
+    async function getOrCreateLocalCryptoKey() {
+      const storedJwk = localStorage.getItem(STORAGE_KEYS.CRYPTO_KEY);
+      if (storedJwk) {
+        return crypto.subtle.importKey(
+          'jwk',
+          JSON.parse(storedJwk),
+          { name: 'AES-GCM', length: 256 },
+          true,
+          ['encrypt', 'decrypt']
+        );
+      }
+      const key = await crypto.subtle.generateKey(
+        { name: 'AES-GCM', length: 256 },
+        true,
+        ['encrypt', 'decrypt']
+      );
+      const exported = await crypto.subtle.exportKey('jwk', key);
+      localStorage.setItem(STORAGE_KEYS.CRYPTO_KEY, JSON.stringify(exported));
+      return key;
+    }
+
+    async function encryptAES256GCM(plainText) {
+      const key = await getOrCreateLocalCryptoKey();
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const encoded = new TextEncoder().encode(plainText);
+      const cipherBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+
+      const ivHex = Array.from(iv).map((b) => b.toString(16).padStart(2, '0')).join('');
+      const cipherHex = Array.from(new Uint8Array(cipherBuffer))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+      return `${ivHex}:${cipherHex}`;
+    }
+
+    async function decryptAES256GCM(cipherPayload) {
+      const [ivHex, cipherHex] = cipherPayload.split(':');
+      const key = await getOrCreateLocalCryptoKey();
+      const iv = new Uint8Array(ivHex.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
+      const cipherBytes = new Uint8Array(cipherHex.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
+
+      const plainBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipherBytes);
+      return new TextDecoder().decode(plainBuffer);
+    }
+
+    async function saveCurrentSessionToJourney() {
+      const encryptedPayload = await encryptAES256GCM(
+        JSON.stringify({
+          history: appState.history,
+          reflection: appState.reflection,
+          blindSpot: appState.insightCard.blindSpot,
+          microChallenge: appState.insightCard.microChallenge,
+        })
+      );
+
+      const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.SESSIONS) || '[]');
+      existing.push({
+        id: `session_${Date.now()}`,
+        trackTitle: appState.selectedTrack.title,
+        tone: appState.selectedTone,
+        keyword: appState.insightCard.keyword,
+        emotionLabel: appState.insightCard.emotionLabel || 'Tỉnh thức',
+        emotionScore: appState.insightCard.emotionScore || 7,
+        encryptedPayload,
+        createdAt: new Date().toISOString(),
+      });
+
+      localStorage.setItem(STORAGE_KEYS.SESSIONS, JSON.stringify(existing));
+      updateJourneyBadgeCount();
+
+      const saveBtn = document.getElementById('save-journey-btn');
+      saveBtn.disabled = true;
+      saveBtn.querySelector('span').textContent = 'Đã mã hóa & lưu vào Hành trình';
+      showToast('Đã mã hóa AES-256-GCM & lưu vào Hành trình của tôi');
+    }
+
+    function updateJourneyBadgeCount() {
+      const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.SESSIONS) || '[]');
+      const badge = document.getElementById('journey-count-badge');
+      if (badge) {
+        badge.textContent = existing.length;
+      }
+    }
+
+    function openTimeCapsuleModal() {
+      const modal = document.getElementById('time-capsule-modal');
+      document.getElementById('capsule-form-view').classList.remove('hidden');
+      document.getElementById('capsule-sealed-view').classList.add('hidden');
+      document.getElementById('capsule-sealed-view').classList.remove('flex');
+      document.getElementById('ciphertext-inspector-box').classList.add('hidden');
+      document.getElementById('capsule-letter-input').value = '';
+      if (appState.authEmail) {
+        document.getElementById('capsule-email-input').value = appState.authEmail;
+      }
+      selectCapsuleDelay(6);
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeTimeCapsuleModal() {
+      const modal = document.getElementById('time-capsule-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function selectCapsuleDelay(months) {
+      appState.capsuleDelayMonths = months;
+      const btn3 = document.getElementById('delay-3-btn');
+      const btn6 = document.getElementById('delay-6-btn');
+      if (months === 3) {
+        btn3.className = 'rounded-xl border border-[#F59E0B] bg-[#F59E0B]/15 py-2.5 text-sm font-bold text-[#F59E0B] transition';
+        btn6.className = 'rounded-xl border border-slate-800 bg-[#0B1120] py-2.5 text-sm font-medium text-slate-400 transition hover:text-slate-200';
+      } else {
+        btn6.className = 'rounded-xl border border-[#F59E0B] bg-[#F59E0B]/15 py-2.5 text-sm font-bold text-[#F59E0B] transition';
+        btn3.className = 'rounded-xl border border-slate-800 bg-[#0B1120] py-2.5 text-sm font-medium text-slate-400 transition hover:text-slate-200';
+      }
+    }
+
+    async function sealTimeCapsule(e) {
+      e.preventDefault();
+      const email = document.getElementById('capsule-email-input').value.trim();
+      const letter = document.getElementById('capsule-letter-input').value.trim();
+      if (!email || !letter) return;
+
+      const unlockDate = new Date();
+      unlockDate.setMonth(unlockDate.getMonth() + appState.capsuleDelayMonths);
+
+      const encryptedLetter = await encryptAES256GCM(letter);
+      const encryptedSnapshot = await encryptAES256GCM(
+        JSON.stringify({
+          history: appState.history,
+          reflection: appState.reflection,
+          insightCard: appState.insightCard,
+        })
+      );
+
+      const capsuleId = `capsule_${Date.now()}`;
+      const capsules = JSON.parse(localStorage.getItem(STORAGE_KEYS.CAPSULES) || '[]');
+      capsules.push({
+        id: capsuleId,
+        recipientEmail: email,
+        monthsDelay: appState.capsuleDelayMonths,
+        encryptedLetter,
+        encryptedSnapshot,
+        unlockAt: unlockDate.toISOString(),
+        createdAt: new Date().toISOString(),
+      });
+      localStorage.setItem(STORAGE_KEYS.CAPSULES, JSON.stringify(capsules));
+      appState.lastSealedCapsuleId = capsuleId;
+
+      const formattedDate = unlockDate.toLocaleDateString('vi-VN', {
+        weekday: 'long',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+
+      document.getElementById('sealed-recipient-text').textContent = email;
+      document.getElementById('sealed-unlock-date-box').textContent = formattedDate;
+      document.getElementById('preview-scheduled-email-btn').textContent =
+        `Xem trước Email gửi sau ${appState.capsuleDelayMonths} tháng`;
+      document.getElementById('ciphertext-inspector-box').textContent =
+        `IV:Ciphertext (AES-256-GCM) => ${encryptedLetter}`;
+
+      document.getElementById('capsule-form-view').classList.add('hidden');
+      document.getElementById('capsule-sealed-view').classList.remove('hidden');
+      document.getElementById('capsule-sealed-view').classList.add('flex');
+    }
+
+    function toggleCiphertextInspector() {
+      const box = document.getElementById('ciphertext-inspector-box');
+      box.classList.toggle('hidden');
+    }
+
+    async function previewCapsuleEmailById(capsuleId) {
+      const capsules = JSON.parse(localStorage.getItem(STORAGE_KEYS.CAPSULES) || '[]');
+      const target = capsules.find((c) => c.id === capsuleId);
+      if (!target) return;
+
+      const letter = await decryptAES256GCM(target.encryptedLetter);
+      const snapshot = JSON.parse(await decryptAES256GCM(target.encryptedSnapshot));
+
+      document.getElementById('email-preview-subject').textContent =
+        `Thông điệp từ chính bạn ${target.monthsDelay} tháng trước trên AI for you`;
+
+      const qaHtml = snapshot.history
+        .map(
+          (item, idx) => `
+          <div class="border-l-2 border-[#F59E0B] pl-3.5 py-0.5 space-y-1">
+            <p class="text-xs text-slate-400">Câu ${idx + 1}: ${escapeHtml(item.question)}</p>
+            <p class="text-sm text-[#F8FAFC]">${escapeHtml(item.answer)}</p>
+          </div>`
+        )
+        .join('');
+
+      document.getElementById('email-preview-content').innerHTML = `
+        <div class="rounded-xl border border-slate-800 bg-[#0B1120] p-4 space-y-1.5">
+          <p class="text-[11px] font-bold text-[#F59E0B] uppercase">Lời nhắn bạn đã gửi cho hôm nay:</p>
+          <p class="whitespace-pre-line text-sm text-[#F8FAFC]">${escapeHtml(letter)}</p>
+        </div>
+        <div class="space-y-3">
+          <p class="text-xs font-bold text-[#F59E0B] uppercase">Đối thoại nội tâm ngày hôm đó</p>
+          ${qaHtml}
+        </div>
+        <div class="rounded-xl border border-slate-800 bg-[#0B1120]/70 p-4 space-y-2">
+          <p class="text-xs text-slate-400">Từ khóa đại diện khi ấy: <strong class="text-[#F59E0B]">${escapeHtml(snapshot.insightCard.keyword)}</strong></p>
+          <p class="text-xs leading-relaxed text-slate-300">${escapeHtml(snapshot.reflection)}</p>
+        </div>
+      `;
+
+      const modal = document.getElementById('email-preview-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function previewLastSealedEmail() {
+      if (appState.lastSealedCapsuleId) {
+        previewCapsuleEmailById(appState.lastSealedCapsuleId);
+      }
+    }
+
+    function closeEmailPreviewModal() {
+      const modal = document.getElementById('email-preview-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // =========================================================================
+    // 9. HÀNH TRÌNH CỦA TÔI (MAGIC LINK + SVG SPLINE AREA CHART)
+    // =========================================================================
+    function sendMagicLinkDemo(e) {
+      e.preventDefault();
+      const email = document.getElementById('magic-link-email-input').value.trim();
+      if (!email) return;
+      appState.pendingMagicEmail = email;
+      document.getElementById('magic-link-sent-target').textContent = email;
+      document.getElementById('magic-link-form').classList.add('hidden');
+      document.getElementById('magic-link-sent-state').classList.remove('hidden');
+    }
+
+    function completeMagicLinkLogin() {
+      const email = appState.pendingMagicEmail || 'ban@example.com';
+      appState.authEmail = email;
+      localStorage.setItem(STORAGE_KEYS.AUTH_EMAIL, email);
+      showToast('Đã xác thực Magic Link thành công');
+      renderJourneyScreen();
+    }
+
+    async function quickDemoJourneyLogin() {
+      const demoEmail = 'triky@aiforyou.vn';
+      appState.authEmail = demoEmail;
+      localStorage.setItem(STORAGE_KEYS.AUTH_EMAIL, demoEmail);
+      const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.SESSIONS) || '[]');
+      if (existing.length === 0) {
+        await seedSampleJourneyRecords(true);
+      }
+      renderJourneyScreen();
+    }
+
+    async function seedSampleJourneyRecords(silent = false) {
+      const now = Date.now();
+      const samples = [
+        {
+          daysAgo: 21,
+          trackTitle: '3 câu hỏi chạm sâu',
+          keyword: 'Lắng Dịu',
+          emotionLabel: 'Trăn trở',
+          emotionScore: 5,
+        },
+        {
+          daysAgo: 14,
+          trackTitle: 'La bàn sự nghiệp',
+          keyword: 'Định Vị',
+          emotionLabel: 'Chiêm nghiệm',
+          emotionScore: 7,
+        },
+        {
+          daysAgo: 7,
+          trackTitle: 'Giải mã nội tâm',
+          keyword: 'Can Đảm',
+          emotionLabel: 'Sáng rõ',
+          emotionScore: 8,
+        },
+        {
+          daysAgo: 1,
+          trackTitle: '3 câu hỏi chạm sâu',
+          keyword: 'Tĩnh Tại',
+          emotionLabel: 'Tỉnh thức',
+          emotionScore: 9,
+        },
+      ];
+
+      const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.SESSIONS) || '[]');
+      for (const s of samples) {
+        const encryptedPayload = await encryptAES256GCM(
+          JSON.stringify({
+            history: [],
+            reflection: 'Mốc phản chiếu mẫu trên hành trình khám phá nội tâm.',
+            blindSpot: 'Chờ đợi sự hoàn hảo trước khi bắt đầu.',
+            microChallenge: 'Thực hiện 1 hành động nhỏ 15 phút mỗi ngày.',
+          })
+        );
+        existing.push({
+          id: `sample_${now - s.daysAgo * 86400000}`,
+          trackTitle: s.trackTitle,
+          tone: 'warm',
+          keyword: s.keyword,
+          emotionLabel: s.emotionLabel,
+          emotionScore: s.emotionScore,
+          encryptedPayload,
+          createdAt: new Date(now - s.daysAgo * 86400000).toISOString(),
+        });
+      }
+
+      localStorage.setItem(STORAGE_KEYS.SESSIONS, JSON.stringify(existing));
+      updateJourneyBadgeCount();
+      if (!silent) {
+        renderJourneyScreen();
+        showToast('Đã nạp thêm 4 mốc hành trình mẫu');
+      }
+    }
+
+    function logoutMagicLink() {
+      appState.authEmail = null;
+      localStorage.removeItem(STORAGE_KEYS.AUTH_EMAIL);
+      document.getElementById('magic-link-form').classList.remove('hidden');
+      document.getElementById('magic-link-sent-state').classList.add('hidden');
+      renderJourneyScreen();
+    }
+
+    function deleteSessionRecord(id) {
+      const sessions = JSON.parse(localStorage.getItem(STORAGE_KEYS.SESSIONS) || '[]');
+      const filtered = sessions.filter((s) => s.id !== id);
+      localStorage.setItem(STORAGE_KEYS.SESSIONS, JSON.stringify(filtered));
+      updateJourneyBadgeCount();
+      renderJourneyScreen();
+      showToast('Đã xóa bản ghi khỏi nhật ký');
+    }
+
+    function clearAllJourneyData() {
+      localStorage.removeItem(STORAGE_KEYS.SESSIONS);
+      localStorage.removeItem(STORAGE_KEYS.CAPSULES);
+      updateJourneyBadgeCount();
+      renderJourneyScreen();
+      showToast('Đã xóa toàn bộ nhật ký cá nhân');
+    }
+
+    function renderSplineAreaChart(sessions) {
+      const container = document.getElementById('spline-chart-container');
+      const detailEl = document.getElementById('spline-selected-detail');
+
+      if (!sessions || sessions.length === 0) {
+        container.innerHTML =
+          '<p class="py-6 text-xs text-slate-400">Chưa có phiên nào được lưu. Hãy hoàn thành một phiên phản chiếu hoặc nhấn "+ Nạp thêm mốc mẫu" để xem biểu đồ biến thiên nội tâm.</p>';
+        return;
+      }
+
+      const sorted = [...sessions].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      const padX = 65;
+      const padTop = 42;
+      const padBottom = 46;
+      const stepX = 155;
+      const svgW = Math.max(640, padX * 2 + Math.max(1, sorted.length - 1) * stepX);
+      const svgH = 235;
+      const chartH = svgH - padTop - padBottom;
+
+      const points = sorted.map((item, idx) => {
+        const x = sorted.length === 1 ? svgW / 2 : padX + idx * stepX;
+        const score = Math.max(1, Math.min(10, item.emotionScore || 7));
+        const y = padTop + chartH - ((score - 1) / 9) * chartH;
+        return { x, y, item, idx };
+      });
+
+      let linePath = `M ${points[0].x} ${points[0].y}`;
+      for (let i = 0; i < points.length - 1; i++) {
+        const p0 = points[i];
+        const p1 = points[i + 1];
+        const midX = (p0.x + p1.x) / 2;
+        linePath += ` C ${midX} ${p0.y}, ${midX} ${p1.y}, ${p1.x} ${p1.y}`;
+      }
+
+      const areaPath =
+        points.length > 1
+          ? `${linePath} L ${points[points.length - 1].x} ${svgH - padBottom} L ${points[0].x} ${svgH - padBottom} Z`
+          : '';
+
+      const gridLines = [2, 5, 8, 10]
+        .map((val) => {
+          const gy = padTop + chartH - ((val - 1) / 9) * chartH;
+          return `<line x1="20" y1="${gy}" x2="${svgW - 20}" y2="${gy}" stroke="rgba(148,163,184,0.12)" stroke-dasharray="4 4" />`;
+        })
+        .join('');
+
+      const nodesSvg = points
+        .map((pt) => {
+          const dateStr = new Date(pt.item.createdAt).toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+          });
+          return `
+            <g class="cursor-pointer group" onclick="selectSplineNode(${pt.idx})">
+              <circle cx="${pt.x}" cy="${pt.y}" r="14" fill="rgba(245,158,11,0.15)" />
+              <circle cx="${pt.x}" cy="${pt.y}" r="5.5" fill="#F59E0B" stroke="#0B1120" stroke-width="2" />
+              <text x="${pt.x}" y="${pt.y - 14}" text-anchor="middle" fill="#FBBF24" font-size="11" font-weight="700">
+                ${escapeHtml(pt.item.keyword)}
+              </text>
+              <text x="${pt.x}" y="${svgH - 22}" text-anchor="middle" fill="#CBD5E1" font-size="11">
+                ${escapeHtml(pt.item.emotionLabel)}
+              </text>
+              <text x="${pt.x}" y="${svgH - 7}" text-anchor="middle" fill="#64748B" font-size="10">
+                ${dateStr}
+              </text>
+            </g>
+          `;
+        })
+        .join('');
+
+      container.innerHTML = `
+        <svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" class="block">
+          <defs>
+            <linearGradient id="splineAreaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.38" />
+              <stop offset="100%" stop-color="#F59E0B" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
+          ${gridLines}
+          ${areaPath ? `<path d="${areaPath}" fill="url(#splineAreaGrad)" />` : ''}
+          ${points.length > 1 ? `<path d="${linePath}" fill="none" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" />` : ''}
+          ${nodesSvg}
+        </svg>
+      `;
+
+      window._sortedJourneySessions = sorted;
+      const latest = sorted[sorted.length - 1];
+      detailEl.innerHTML = `Gần nhất: <strong class="text-[#F59E0B]">${escapeHtml(latest.keyword)}</strong> • Trạng thái <strong>${escapeHtml(latest.emotionLabel)}</strong> (${latest.emotionScore}/10) — Hành trình "${escapeHtml(latest.trackTitle)}"`;
+    }
+
+    function selectSplineNode(idx) {
+      const sorted = window._sortedJourneySessions || [];
+      const item = sorted[idx];
+      if (!item) return;
+      const dateFull = new Date(item.createdAt).toLocaleDateString('vi-VN');
+      document.getElementById('spline-selected-detail').innerHTML =
+        `Ngày ${dateFull}: <strong class="text-[#F59E0B]">${escapeHtml(item.keyword)}</strong> • Cảm xúc <strong>${escapeHtml(item.emotionLabel)}</strong> (${item.emotionScore}/10) — "${escapeHtml(item.trackTitle)}"`;
+    }
+
+    function renderJourneyScreen() {
+      const savedEmail = localStorage.getItem(STORAGE_KEYS.AUTH_EMAIL);
+      appState.authEmail = savedEmail;
+
+      const authCard = document.getElementById('magic-link-auth-card');
+      const dashboard = document.getElementById('journey-dashboard');
+      const userBar = document.getElementById('journey-user-bar');
+
+      if (!savedEmail) {
+        authCard.classList.remove('hidden');
+        dashboard.classList.add('hidden');
+        userBar.classList.add('hidden');
+        return;
+      }
+
+      authCard.classList.add('hidden');
+      dashboard.classList.remove('hidden');
+      userBar.classList.remove('hidden');
+      userBar.classList.add('flex');
+      document.getElementById('journey-user-email').textContent = savedEmail;
+
+      const sessions = JSON.parse(localStorage.getItem(STORAGE_KEYS.SESSIONS) || '[]');
+      const capsules = JSON.parse(localStorage.getItem(STORAGE_KEYS.CAPSULES) || '[]');
+
+      renderSplineAreaChart(sessions);
+
+      const capsuleListEl = document.getElementById('sealed-capsules-list');
+      if (capsules.length === 0) {
+        capsuleListEl.innerHTML =
+          '<p class="col-span-full text-xs text-slate-500">Chưa có bức thư Hộp thời gian nào được niêm phong.</p>';
+      } else {
+        capsuleListEl.innerHTML = capsules
+          .slice()
+          .reverse()
+          .map((cap) => {
+            const unlockStr = new Date(cap.unlockAt).toLocaleDateString('vi-VN', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            });
+            return `
+              <div class="spotlight-card rounded-2xl border border-[#F59E0B]/35 p-4 space-y-2.5">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-[#F59E0B]">Đã đóng dấu niêm phong AES-256</span>
+                  <span class="text-slate-400">Mở khóa: ${unlockStr}</span>
+                </div>
+                <p class="text-xs text-slate-300">Gửi tới: <strong class="text-slate-100">${escapeHtml(cap.recipientEmail)}</strong> (Sau ${cap.monthsDelay} tháng)</p>
+                <button
+                  type="button"
+                  onclick="previewCapsuleEmailById('${cap.id}')"
+                  class="text-xs font-semibold text-[#F59E0B] underline hover:text-[#F59E0B]/80"
+                >
+                  Giải mã & xem trước nội dung email
+                </button>
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      const cardsGrid = document.getElementById('saved-cards-grid');
+      if (sessions.length === 0) {
+        cardsGrid.innerHTML =
+          '<p class="col-span-full text-xs text-slate-500">Danh sách thẻ chân dung đang trống.</p>';
+      } else {
+        cardsGrid.innerHTML = sessions
+          .slice()
+          .reverse()
+          .map((rec) => {
+            const dateStr = new Date(rec.createdAt).toLocaleDateString('vi-VN');
+            return `
+              <div class="spotlight-card tilt-3d rounded-2xl border border-slate-800 p-5 space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                  <span>${escapeHtml(rec.trackTitle)}</span>
+                  <span>${dateStr}</span>
+                </div>
+                <div class="text-lg font-bold text-[#F59E0B]">${escapeHtml(rec.keyword)}</div>
+                <div class="flex items-center justify-between pt-1">
+                  <span class="text-xs text-slate-300">Cảm xúc: ${escapeHtml(rec.emotionLabel)} (${rec.emotionScore}/10)</span>
+                  <button
+                    type="button"
+                    onclick="deleteSessionRecord('${rec.id}')"
+                    class="text-xs text-slate-500 hover:text-red-400 transition"
+                  >
+                    Xóa
+                  </button>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+      }
+    }
+
+    // =========================================================================
+    // 10. CHATBOT CHUYÊN GIA TƯ VẤN TÂM LÝ AI (STREAMING + DEMO XEM TRƯỚC)
+    // =========================================================================
+    const counselorState = {
+      isOpen: false,
+      isStreaming: false,
+      useDemoMode: window.location.protocol === 'file:',
+      messages: [],
+      lastFailedPayload: null,
+      finalTakeawayQuote: '',
+    };
+
+    function updateCounselorModePillUI() {
+      const pill = document.getElementById('counselor-mode-pill');
+      if (!pill) return;
+      if (counselorState.useDemoMode) {
+        pill.textContent = 'Demo Xem Trước';
+        pill.className =
+          'rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300 transition hover:bg-emerald-500/25';
+      } else {
+        pill.textContent = 'API /api/chat';
+        pill.className =
+          'rounded-full border border-[#F59E0B]/45 bg-[#F59E0B]/15 px-2 py-0.5 text-[10px] font-semibold text-[#F59E0B] transition hover:bg-[#F59E0B]/25';
+      }
+    }
+
+    function toggleCounselorConnectionMode() {
+      counselorState.useDemoMode = !counselorState.useDemoMode;
+      updateCounselorModePillUI();
+      showToast(
+        counselorState.useDemoMode
+          ? 'Đã chuyển sang Chế độ Demo Xem Trước (không cần Backend)'
+          : 'Đã chuyển sang Chế độ Backend API (/api/chat)'
+      );
+    }
+
+    function getCurrentCounselorContext() {
+      return {
+        tone: appState.selectedTone,
+        trackTitle: appState.selectedTrack?.title || '3 câu hỏi chạm sâu',
+        qaHistory: appState.history || [],
+        reflection: appState.reflection || '',
+        blindSpot: appState.insightCard?.blindSpot || '',
+      };
+    }
+
+    function buildInitialCounselorGreeting() {
+      const ctx = getCurrentCounselorContext();
+      if (ctx.qaHistory.length > 0) {
+        const lastAnswer = ctx.qaHistory[ctx.qaHistory.length - 1].answer;
+        const snippet = lastAnswer.length > 62 ? `${lastAnswer.slice(0, 59)}...` : lastAnswer;
+        return `Chào bạn, tôi đã đọc kỹ ${ctx.qaHistory.length} chia sẻ của bạn trong hành trình "${ctx.trackTitle}", đặc biệt là điều bạn vừa chạm tới: "${snippet}".\n\nNgay lúc này, có nút thắt cảm xúc nào bạn muốn cùng tôi gỡ sâu hơn trước khi chúng ta đúc kết thông điệp cuối cùng không?`;
+      }
+      return `Chào bạn, tôi là Chuyên gia Tư vấn Tâm lý đồng hành cùng bạn trên AI for you.\n\nBạn có thể chia sẻ trực tiếp điều đang khiến lòng mình bận tâm, hoặc nhấn "⚡ Nạp phiên mẫu" ở thanh công cụ phía trên để xem cách tôi phân tích chuỗi câu hỏi và đúc kết thông điệp cuối cùng nhé.`;
+    }
+
+    function toggleCounselorChat() {
+      counselorState.isOpen = !counselorState.isOpen;
+      const panel = document.getElementById('counselor-chat-panel');
+      if (counselorState.isOpen) {
+        panel.classList.remove('hidden');
+        panel.classList.add('flex');
+        updateCounselorModePillUI();
+        syncCounselorContextBadge();
+        if (counselorState.messages.length === 0) {
+          counselorState.messages.push({
+            role: 'assistant',
+            content: buildInitialCounselorGreeting(),
+          });
+        }
+        renderCounselorMessages();
+        setTimeout(() => document.getElementById('counselor-input')?.focus(), 80);
+      } else {
+        panel.classList.add('hidden');
+        panel.classList.remove('flex');
+      }
+    }
+
+    function openCounselorChat(refreshGreetingWithLatestQA = false) {
+      if (refreshGreetingWithLatestQA && counselorState.messages.length <= 1) {
+        counselorState.messages = [
+          {
+            role: 'assistant',
+            content: buildInitialCounselorGreeting(),
+          },
+        ];
+      }
+      if (!counselorState.isOpen) {
+        toggleCounselorChat();
+      } else {
+        syncCounselorContextBadge();
+        renderCounselorMessages();
+      }
+    }
+
+    function syncCounselorContextBadge() {
+      const badge = document.getElementById('counselor-context-badge');
+      const seedBtn = document.getElementById('quick-demo-seed-btn');
+      const count = appState.history?.length || 0;
+      if (badge) {
+        badge.textContent =
+          count > 0
+            ? `Đã đồng bộ ${count} câu trả lời • ${appState.selectedTrack.title}`
+            : `Chế độ đồng hành • ${appState.selectedTrack.title}`;
+      }
+      if (seedBtn) {
+        seedBtn.textContent = count > 0 ? `✓ Đã nạp ${count} Q&A` : '⚡ Nạp phiên mẫu';
+      }
+    }
+
+    function loadDemoReflectionContext() {
+      appState.selectedTrack = REFLECTION_TRACKS[0];
+      appState.history = [
+        {
+          question: REFLECTION_TRACKS[0].questions[0],
+          answer: 'Khoảnh khắc tôi nhận ra mình đã cố gắng làm hài lòng kỳ vọng của gia đình suốt 2 năm qua mà quên mất điều bản thân thực sự muốn theo đuổi.',
+        },
+        {
+          question: REFLECTION_TRACKS[0].questions[1],
+          answer: 'Cảm giác vừa kiệt sức vì phải gồng mình tỏ ra ổn, vừa lo sợ nếu rẽ sang hướng mới sẽ làm mọi người thất vọng.',
+        },
+        {
+          question: REFLECTION_TRACKS[0].questions[2],
+          answer: 'Tối nay tôi sẽ dành 15 phút viết ra thành thật điều tôi muốn thử nghiệm trong 3 tháng tới mà không tự phán xét.',
+        },
+      ];
+      appState.reflection =
+        'Bạn đang đứng ở giao điểm giữa sự an toàn của những kỳ vọng quen thuộc và tiếng gọi tự do từ bên trong. Sự mệt mỏi hiện tại không phải vì bạn yếu đuối, mà vì bạn đã đeo chiếc mặt nạ "luôn ổn" quá lâu.\n\nChỉ cần một bước nhỏ thành thật với chính mình tối nay cũng đủ tạo ra một khoảng thở mới.';
+      appState.insightCard = {
+        keyword: 'Thành Thật & Can Đảm',
+        blindSpot: 'Bạn đang sợ làm người khác thất vọng nhiều hơn sợ đánh mất chính mình.',
+        microChallenge: 'Viết ra 1 điều bạn thực sự muốn thử nghiệm mà không tự phán xét.',
+        emotionLabel: 'Lắng đọng',
+        emotionScore: 7,
+      };
+
+      syncCounselorContextBadge();
+      counselorState.messages = [
+        {
+          role: 'assistant',
+          content: buildInitialCounselorGreeting(),
+        },
+      ];
+      renderCounselorMessages();
+      showToast('Đã nạp dữ liệu 3 câu hỏi phản chiếu mẫu vào Chuyên gia Tâm lý AI');
+    }
+
+    function clearCounselorHistory() {
+      if (counselorState.isStreaming) return;
+      counselorState.messages = [
+        {
+          role: 'assistant',
+          content: buildInitialCounselorGreeting(),
+        },
+      ];
+      counselorState.lastFailedPayload = null;
+      renderCounselorMessages();
+      showToast('Đã làm mới lịch sử trò chuyện tâm lý');
+    }
+
+    function renderCounselorMessages() {
+      const box = document.getElementById('counselor-messages-box');
+      if (!box) return;
+
+      box.innerHTML = counselorState.messages
+        .map((msg) => {
+          if (msg.role === 'user') {
+            return `
+              <div class="flex justify-end">
+                <div class="max-w-[84%] rounded-2xl rounded-br-sm bg-[#F59E0B] px-3.5 py-2.5 text-xs font-medium leading-relaxed text-[#0B1120] shadow-md">
+                  ${escapeHtml(msg.content).replace(/\n/g, '<br>')}
+                </div>
+              </div>
+            `;
+          }
+
+          if (msg.isError) {
+            return `
+              <div class="flex justify-start">
+                <div class="max-w-[88%] space-y-2 rounded-2xl rounded-bl-sm border border-red-500/40 bg-red-950/50 px-3.5 py-2.5 text-xs leading-relaxed text-red-200">
+                  <p>${escapeHtml(msg.content)}</p>
+                  <button
+                    type="button"
+                    onclick="retryLastCounselorMessage()"
+                    class="rounded-lg border border-red-400/50 bg-red-500/20 px-2.5 py-1 text-[11px] font-semibold text-red-100 hover:bg-red-500/30"
+                  >
+                    Thử gửi lại
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+
+          if (msg.isTyping) {
+            return `
+              <div class="flex justify-start">
+                <div class="inline-flex items-center gap-1.5 rounded-2xl rounded-bl-sm border border-slate-700/80 bg-[#0B1120]/90 px-4 py-3">
+                  <span class="h-1.5 w-1.5 animate-bounce rounded-full bg-[#F59E0B]" style="animation-delay: 0s;"></span>
+                  <span class="h-1.5 w-1.5 animate-bounce rounded-full bg-[#F59E0B]" style="animation-delay: 0.15s;"></span>
+                  <span class="h-1.5 w-1.5 animate-bounce rounded-full bg-[#F59E0B]" style="animation-delay: 0.3s;"></span>
+                </div>
+              </div>
+            `;
+          }
+
+          const formattedHtml = escapeHtml(msg.content)
+            .replace(/\n/g, '<br>')
+            .replace(
+              /(THÔNG ĐIỆP CUỐI CÙNG:.*)/g,
+              '<div class="mt-2.5 rounded-xl border border-[#F59E0B]/50 bg-[#F59E0B]/15 p-2.5 font-semibold text-[#FBBF24]">$1</div>'
+            );
+
+          const applyCardBtn =
+            msg.hasFinalTakeaway
+              ? `<button
+                  type="button"
+                  onclick="applyFinalTakeawayToPortraitCard()"
+                  class="mt-2 inline-flex items-center gap-1 rounded-lg bg-[#F59E0B] px-2.5 py-1 text-[11px] font-bold text-[#0B1120] transition hover:bg-[#F59E0B]/90"
+                >
+                  Khắc lên Thẻ Chân Dung 9:16
+                </button>`
+              : '';
+
+          return `
+            <div class="flex justify-start">
+              <div class="max-w-[88%] rounded-2xl rounded-bl-sm border border-slate-800 bg-[#0B1120]/90 px-3.5 py-2.5 text-xs leading-relaxed text-slate-200">
+                <div class="${msg.isStreamingNow ? 'stream-cursor' : ''}">${formattedHtml}</div>
+                ${applyCardBtn}
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function handleCounselorInputKeydown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleCounselorSubmit(e);
+      }
+    }
+
+    function handleCounselorSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('counselor-input');
+      const text = input.value.trim();
+      if (!text || counselorState.isStreaming) return;
+      input.value = '';
+      sendCounselorStreamRequest(text, false);
+    }
+
+    function sendQuickCounselorPrompt(promptText) {
+      if (counselorState.isStreaming) return;
+      sendCounselorStreamRequest(promptText, false);
+    }
+
+    function requestFinalTakeawayMessage() {
+      if (counselorState.isStreaming) return;
+      const promptText =
+        'Dựa trên toàn bộ chuỗi câu hỏi tôi đã trả lời và cuộc trò chuyện này, hãy đúc kết cho tôi thông điệp cuối cùng sâu sắc nhất.';
+      sendCounselorStreamRequest(promptText, true);
+    }
+
+    function retryLastCounselorMessage() {
+      if (!counselorState.lastFailedPayload || counselorState.isStreaming) return;
+      if (counselorState.messages[counselorState.messages.length - 1]?.isError) {
+        counselorState.messages.pop();
+      }
+      const { userText, isFinalSynthesis } = counselorState.lastFailedPayload;
+      if (counselorState.messages[counselorState.messages.length - 1]?.role === 'user') {
+        counselorState.messages.pop();
+      }
+      sendCounselorStreamRequest(userText, isFinalSynthesis);
+    }
+
+    function buildSimulatedPsychologistResponse(userText, context, isFinalSynthesis) {
+      const qaList = context.qaHistory || [];
+      const tone = context.tone || 'warm';
+      const hasQA = qaList.length > 0;
+      const firstAns = hasQA ? qaList[0].answer : '';
+      const lastAns = hasQA ? qaList[qaList.length - 1].answer : '';
+      const anchorSnippet = (lastAns || userText).replace(/[.!?]+$/, '').trim();
+      const shortAnchor =
+        anchorSnippet.length > 68 ? `${anchorSnippet.slice(0, 65).trim()}...` : anchorSnippet;
+
+      if (isFinalSynthesis) {
+        if (hasQA) {
+          const firstSnippet = firstAns.length > 55 ? `${firstAns.slice(0, 52).trim()}...` : firstAns;
+          if (tone === 'direct') {
+            return `Nhìn xuyên suốt từ điều bạn bộc bạch ban đầu ("${firstSnippet}") đến hành động bạn tự chọn ("${shortAnchor}"), nút thắt lớn nhất của bạn không nằm ở thiếu năng lực mà ở việc trì hoãn lựa chọn vì sợ mất lòng người khác.\n\nKhi bạn ngừng xin phép để được sống đúng với giá trị của mình, mọi năng lượng bị phân tán sẽ lập tức quy tụ lại.\n\nTHÔNG ĐIỆP CUỐI CÙNG: "Sự bình yên thật sự bắt đầu ngay khoảnh khắc bạn dám chọn điều mình tin, thay vì chọn điều khiến mọi người vừa lòng."`;
+          }
+          if (tone === 'philosophical') {
+            return `Từ khoảnh khắc bạn chững lại ở "${firstSnippet}" cho tới hạt mầm hành động "${shortAnchor}", tâm trí bạn đã đi trọn một vòng cung từ hoang mang sang tỉnh thức. Mọi câu hỏi bên ngoài rốt cuộc đều chỉ là tấm gương phản chiếu câu trả lời vốn đã nảy mầm bên trong bạn.\n\nTHÔNG ĐIỆP CUỐI CÙNG: "Không có ngã rẽ nào sai khi bước chân hôm nay được dẫn lối bởi sự trung thực với chính linh hồn mình."`;
+          }
+          return `Tổng hợp lại hành trình ${qaList.length} câu hỏi vừa qua — từ nỗi trăn trở "${firstSnippet}" đến bước đi dịu dàng bạn chọn cho 24 giờ tới ("${shortAnchor}") — tôi thấy ở bạn một nội lực rất ấm áp và chân thành. Bạn không cần phải bước thật xa ngay lập tức, chỉ cần tiếp tục giữ lời hứa nhỏ hôm nay với chính mình.\n\nTHÔNG ĐIỆP CUỐI CÙNG: "Bạn xứng đáng được lắng nghe và nâng niu bởi chính mình trước khi cố gắng làm hài lòng cả thế giới."`;
+        }
+
+        return `Qua những chia sẻ vừa rồi về "${shortAnchor}", điều quý giá nhất là bạn đã dám gọi tên cảm xúc thật của mình thay vì né tránh. Khi một nỗi bận tâm được nhìn thẳng trong ánh sáng của sự thấu hiểu, nó không còn quyền chi phối bạn trong im lặng nữa.\n\nTHÔNG ĐIỆP CUỐI CÙNG: "Mỗi lần bạn thành thật đối diện với cảm xúc bên trong, bạn lại thu hồi thêm một phần tự do cho chính mình."`;
+      }
+
+      if (hasQA) {
+        if (tone === 'direct') {
+          return `Tôi đặt chia sẻ này cạnh câu trả lời của bạn trong phiên "${context.trackTitle}" ("${shortAnchor}"). Có một điểm chung rất rõ: bạn đang dùng sự suy tính cẩn trọng như một tấm khiên để trì hoãn bước đi đầu tiên.\n\nNếu hôm nay bạn chỉ được phép giữ lại một ưu tiên duy nhất cho chính mình, bạn sẽ mạnh dạn đặt điều gì xuống trước?`;
+        }
+        if (tone === 'philosophical') {
+          return `Điều bạn vừa nói chạm rất gần với mạch ngầm trong chia sẻ "${shortAnchor}" trước đó. Đôi khi sự giằng co không phải để tìm ra phương án hoàn hảo, mà để giúp ta nhận ra đâu mới là giá trị mình không muốn đánh đổi.\n\nTheo bạn, nếu nỗi sợ thất bại tạm biến mất trong 5 phút, lựa chọn nào sẽ tự nhiên hiện ra rõ nhất?`;
+        }
+        return `Tôi nghe thấy sự chân thành rất rõ trong lời bạn vừa chia sẻ, và nó nối tiếp tự nhiên với điều bạn từng mở lòng ở "${shortAnchor}". Việc bạn nhận diện được cảm xúc này đã là một bước tiến rất đáng trân trọng rồi.\n\nNgay lúc này, điều gì sẽ giúp lòng bạn nhẹ đi khoảng 10% mà bạn có thể tự trao cho mình trong tối nay?`;
+      }
+
+      if (tone === 'direct') {
+        return `Cảm ơn bạn đã đi thẳng vào vấn đề qua chia sẻ "${shortAnchor}". Thay vì cố giải quyết mọi thứ cùng lúc, hãy tách bạch đâu là điều nằm trong tầm kiểm soát của bạn hôm nay và đâu là kỳ vọng từ bên ngoài.\n\nTrong câu chuyện này, điều gì đang khiến bạn tiêu tốn nhiều năng lượng nhất nhưng lại ít mang lại kết quả nhất?`;
+      }
+      return `Cảm ơn bạn đã tin tưởng chia sẻ về "${shortAnchor}". Khi tâm trí đang mang nhiều lớp suy nghĩ đan xen, việc chậm lại một nhịp để gọi tên từng cảm xúc như cách bạn đang làm là điều vô cùng cần thiết.\n\nNếu được mô tả cảm giác ẩn sâu bên dưới suy nghĩ này bằng một hình ảnh hoặc một từ khóa, bạn sẽ gọi tên nó là gì?`;
+    }
+
+    async function sendCounselorStreamRequest(userText, isFinalSynthesis = false) {
+      counselorState.isStreaming = true;
+      counselorState.lastFailedPayload = { userText, isFinalSynthesis };
+      document.getElementById('counselor-send-btn').disabled = true;
+      document.getElementById('synthesize-final-btn').disabled = true;
+
+      counselorState.messages.push({ role: 'user', content: userText });
+
+      const apiMessages = counselorState.messages
+        .filter((m) => !m.isError && !m.isTyping)
+        .map((m) => ({ role: m.role, content: m.content }));
+
+      const aiMsgIndex = counselorState.messages.length;
+      counselorState.messages.push({
+        role: 'assistant',
+        content: '',
+        isTyping: true,
+        isStreamingNow: true,
+        hasFinalTakeaway: false,
+      });
+      renderCounselorMessages();
+
+      try {
+        if (!navigator.onLine) {
+          throw new Error('OFFLINE');
+        }
+
+        let accumulatedText = '';
+
+        if (!counselorState.useDemoMode) {
+          try {
+            const response = await fetch('/api/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                messages: apiMessages,
+                context: getCurrentCounselorContext(),
+                isFinalSynthesis,
+              }),
+            });
+
+            if (!response.ok) {
+              if (response.status === 429) throw new Error('QUOTA_EXCEEDED');
+              throw new Error('BACKEND_UNAVAILABLE');
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let buffer = '';
+
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+
+              buffer += decoder.decode(value, { stream: true });
+              const events = buffer.split('\n\n');
+              buffer = events.pop() || '';
+
+              for (const evt of events) {
+                if (!evt.startsWith('data: ')) continue;
+                const payload = JSON.parse(evt.slice(6));
+                if (payload.error) throw new Error(payload.message || payload.error);
+
+                if (payload.text) {
+                  accumulatedText += payload.text;
+                  counselorState.messages[aiMsgIndex].isTyping = false;
+                  counselorState.messages[aiMsgIndex].content = accumulatedText;
+                  renderCounselorMessages();
+                }
+              }
+            }
+          } catch (fetchErr) {
+            if (fetchErr.message === 'QUOTA_EXCEEDED') throw fetchErr;
+            counselorState.useDemoMode = true;
+            updateCounselorModePillUI();
+          }
+        }
+
+        if (counselorState.useDemoMode && !accumulatedText) {
+          await new Promise((r) => setTimeout(r, 650));
+          const fullDemoReply = buildSimulatedPsychologistResponse(
+            userText,
+            getCurrentCounselorContext(),
+            isFinalSynthesis
+          );
+
+          counselorState.messages[aiMsgIndex].isTyping = false;
+          const tokens = fullDemoReply.split(/(\s+)/);
+          for (let i = 0; i < tokens.length; i++) {
+            accumulatedText += tokens[i];
+            counselorState.messages[aiMsgIndex].content = accumulatedText;
+            renderCounselorMessages();
+            await new Promise((r) => setTimeout(r, 24));
+          }
+        }
+
+        counselorState.messages[aiMsgIndex].isStreamingNow = false;
+
+        const match = accumulatedText.match(/THÔNG ĐIỆP CUỐI CÙNG:\s*[“"]?([^”"\n]+)[”"]?/i);
+        if (match && match[1]) {
+          counselorState.finalTakeawayQuote = match[1].trim();
+          counselorState.messages[aiMsgIndex].hasFinalTakeaway = true;
+        }
+        renderCounselorMessages();
+        counselorState.lastFailedPayload = null;
+      } catch (err) {
+        let friendlyMsg =
+          'Kết nối tới Chuyên gia Tâm lý AI bị gián đoạn. Vui lòng kiểm tra mạng hoặc server rồi thử lại.';
+        if (err.message === 'OFFLINE') {
+          friendlyMsg =
+            'Thiết bị đang mất kết nối mạng. Hãy kiểm tra Wi-Fi/4G rồi nhấn Thử gửi lại nhé.';
+        } else if (err.message === 'QUOTA_EXCEEDED') {
+          friendlyMsg =
+            'Hệ thống đang chạm giới hạn lượt gọi API (Quota). Bạn hãy hít thở sâu 10 giây rồi nhấn Thử gửi lại nhé.';
+        } else if (err.message) {
+          friendlyMsg = err.message;
+        }
+
+        counselorState.messages[aiMsgIndex] = {
+          role: 'assistant',
+          isError: true,
+          content: friendlyMsg,
+        };
+        renderCounselorMessages();
+      } finally {
+        counselorState.isStreaming = false;
+        document.getElementById('counselor-send-btn').disabled = false;
+        document.getElementById('synthesize-final-btn').disabled = false;
+      }
+    }
+
+    function applyFinalTakeawayToPortraitCard() {
+      if (!counselorState.finalTakeawayQuote) return;
+      appState.insightCard.microChallenge = counselorState.finalTakeawayQuote;
+      document.getElementById('result-challenge-text').textContent =
+        counselorState.finalTakeawayQuote;
+      drawInsightCardCanvas();
+      switchScreen('result');
+      showToast('Đã khắc thông điệp cuối cùng lên Thẻ Chân Dung 9:16');
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderLandingSelectors();
+      updateCounselorModePillUI();
+    });
+  </script>
+</body>
+</html>
